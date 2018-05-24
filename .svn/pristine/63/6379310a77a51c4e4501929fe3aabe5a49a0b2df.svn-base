@@ -1,0 +1,34 @@
+#set($page_title="汇率编辑") #set($layout="layout.vm")
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	&nbsp;#include("sku/skuChildOper.vm")<br/>
+	<div class="widget-body">
+		<div class="widget-main">
+			<h4 class="header green lighter bigger">汇率设置</h4>
+
+			<form action="saveExchangeRate.do" onsubmit="return checkUrls();" method="post">
+				<fieldset>
+					<div class="widget-main">
+					#foreach($item in ${exchangeRates})
+						<label class="block clearfix "> 
+							#if($item.zhcurrency != "人民币")
+								1&nbsp;$item.zhcurrency&nbsp;=&nbsp;<input type="text" name="$item.currency" style="width:300px;" placeholder="必填项" value="$item.value" required/>&nbsp;元人民币
+							#end
+						</label>
+					#end
+					</div>
+					<div class="clearfix">
+						<button id="submitButton" type="submit" class="width-40 btn btn-sm btn-success" >
+							保存 <i class="icon-arrow-right icon-on-right"></i>
+						</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	<!-- /widget-body -->
+</div>
+<!-- /signup-box -->
+</div>
+<!-- /position-relative -->
+

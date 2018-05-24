@@ -1,0 +1,28 @@
+#set($page_title="SKU管理") #set($layout="layout.vm")
+<div id="signup-box" class="signup-box widget-box no-border">
+	&nbsp;#include("sku/skuChildOper.vm")<br/>
+	<div class="widget-body">
+		<div class="widget-main">
+			<h4 class="header green lighter bigger">SKU信息管理系统</h4>
+			<form>
+				<div>
+					<input id="file_upload" name="file_upload" type="file" /><span style="color:red;">批量抓取平均时间1分钟3-4条数据，请计算好时间，尽量在服务器空闲的时候操作</span>
+				</div>
+				<div id="myqueue"></div>
+			</form>
+		</div>
+	</div>
+	<!-- /widget-body -->
+</div>
+<!-- /signup-box -->
+</div>
+<!-- /position-relative -->
+
+#define($jsblock)
+<link rel="stylesheet" href="js/uploadify/uploadify.css" />
+<script src="js/uploadify/jquery.uploadify.js"></script>
+<script type="text/javascript">
+	var int = window.setInterval("surplusQueueCount()", 20000);
+</script>
+<script src="js/sku/upload.js"></script>
+#end

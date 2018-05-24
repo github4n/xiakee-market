@@ -1,0 +1,49 @@
+#set($page_title="订单来源追踪") 
+#set($layout="layout.vm")
+
+#include("analy/menu.vm")
+<div class="table-responsive">
+	<h1>追踪名称：$bean.title</h1>
+	<h3>推广人：${bean.promotion}</h3>
+	<h3>备注：$bean.remark</h3>
+	<h3>设置时间：$bean.created</h3>
+	#if(${bean.code})
+		<h3 style="color:red;">推广链接：</h3>
+		<h3 style="color:red;padding-left:50px;">PC端：${pc}</h3>
+		<h3 style="color:red;padding-left:50px;">手机端：${wap}</h3>
+	#end
+</div>
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	<div class="widget-body">
+		<div class="widget-main">
+			<form action="createReferCode.do" method="post">
+				<fieldset>
+					<input name="id" id="id" type="hidden" value="${bean.id}">
+					<label class="block clearfix"> <span class="block input-icon input-icon-right"> 
+					    #if(${bean.code})
+						    <input type="text" class="form-control" placeholder="推广链接" name="url" value="${wap}"/>
+						#else
+							<input type="text" class="form-control" placeholder="请输入所要推广的商城链接" name="url"/>
+						#end
+					</span>
+                    </label>
+					<br>
+					<div class="clearfix">
+						<button type="submit"
+							class="width-100 btn btn-sm btn-success">
+							确定 <i class="icon-arrow-right icon-on-right"></i>
+						</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	<!-- /widget-body -->
+	<div class="table-responsive">
+    <div ><img style="width:500px;height:500px;" src="getQrcodeImage.do?url=${wap}"></div>
+</div>
+</div>
+<!-- /signup-box -->
+</div>
+<!-- /position-relative -->

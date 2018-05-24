@@ -1,0 +1,6 @@
+<div style="padding-left:10px;">
+        <a href="beforeAddOrderReferrerCode.do" class="btn btn-sm btn-success nav-search-input">添加推广</a>
+        <a href="findOrderReferrer.do" class="btn btn-sm btn-success nav-search-input">推广管理</a>
+        <a href="displayReferUrls.do" class="btn btn-sm btn-success nav-search-input">链接管理</a>
+        <a href="getQrcodeImage.do" class="btn btn-sm btn-success nav-search-input">二维码生成</a>
+</div>

@@ -1,0 +1,27 @@
+#set($page_title="二维码生成器") 
+#set($layout="layout.vm")
+
+#include("analy/menu.vm")
+<div style="margin-top:5px;margin-left:15px">
+	<form action="addReferUrl.do" method="post">
+		<fieldset>
+			<label class="block clearfix"> 
+				<span class="block input-icon input-icon-right"> 
+			    	<input type="text" class="form-control" placeholder="请输入所要推广的商城链接" name="url"/>
+				</span>
+            </label>
+			<label class="block clearfix"> 
+				<span class="block input-icon input-icon-right"> 
+			    <input type="text" class="form-control" placeholder="请输入链接标题" name="title"/>
+				</span>
+            </label>
+			<br>
+			<div class="clearfix">
+				<button type="submit"
+					class="width-100 btn btn-sm btn-success">
+					确定 <i class="icon-arrow-right icon-on-right"></i>
+				</button>
+			</div>
+		</fieldset>
+	</form>
+</div>

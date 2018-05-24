@@ -1,0 +1,47 @@
+#set($page_title="订单来源追踪") 
+#set($layout="layout.vm")
+
+#include("analy/menu.vm")
+<div style="padding:10px;background:rgb(221, 221, 221);" >
+	<form action="addReferUrl.do" method="post">
+		<label> 
+			<input style="width:300px;" type="text"  placeholder="请输入推广链接标题" name="title">
+		</label>
+		<label> 
+			<input style="width:400px;" type="text"  placeholder="请输入所要推广的商城链接" name="url">
+		</label>
+		<button type="submit" class="btn btn-sm btn-success nav-search-input">
+			添加
+		</button>
+    </form>
+</div>
+<div class="table-responsive">
+	<table id="sample-table-1"
+		class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>推广名称</th>
+				<th>推广链接</th>
+				<th>设置时间</th>
+				<th>链接推广</th>
+				<th>删除</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			#foreach($sal in ${beans})
+			<tr>
+				<td>$sal.title</td>
+				<td><a href="$sal.url" target="_black">$sal.url</a></td>
+				<td>$sal.created</td>
+                <td>
+                	<a href="getUrlsById.do?id=$sal.id">转发推广</a>
+                </td>
+                <td>
+                	<a href="delReferUrlById.do?id=$sal.id" onClick="return confirm('确定删除?');"><i class="icon-remove"></i></a>
+                </td>
+			</tr>
+			#end
+		</tbody>
+	</table>
+</div>

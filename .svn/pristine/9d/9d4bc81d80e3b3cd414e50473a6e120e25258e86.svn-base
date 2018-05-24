@@ -1,0 +1,24 @@
+##email send setup
+email.protocol=smtp
+email.host=smtp.exmail.qq.com
+email.port=25
+email.username=auto@xiakee.com
+email.password=linHui168_xia360ke
+email.auth=true
+email.systemEmail=auto@xiakee.com
+#email.isSendEmail=true
+email.isSendEmail=false
+
+##smsc send setup
+smsc.isSendSmsc=true
+#smsc.isSendSmsc=false
+
+
+##ecstore openapi url setup
+#ecos.url=http://www.xiakee.com/index.php/api
+ecos.url=http://10.10.7.2/index.php/api
+
+#crawler.url=http://192.168.100.3:88
+crawler.url=http://localhost:8080/crawler
+
+analy.referCode=ec7f3926c47f21428fc224a13e21d9fd097d2c645695d490a814c2a705436c1f

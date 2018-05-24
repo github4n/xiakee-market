@@ -1,0 +1,107 @@
+#set($page_title="商城订单物流信息浏览") 
+#set($layout="layout.vm")
+<div class="table-responsive">
+	<h1>订单号：${orderId}</h1>
+	<h3>收货人：$bean.name</h3>
+	<h3>联系方式：$bean.mobile</h3>
+	<h3>收货地址：$bean.address</h3>
+</div>
+<div class="table-responsive">
+	<form action="addOrderLogist.do" method="post">
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>物流操作时间</th>
+					<th>物流操作内容</th>
+				</tr>
+			</thead>
+			<input name="rel_id" id="rel_id" type="hidden" value="${orderId}">
+			<input name="node" id="node" type="hidden" value="${node}">
+			<tbody>
+				#foreach($sal in ${beans})
+				<tr>
+					<td>$sal.altTimeStr</td>
+					<td>$sal.log_text</td>
+				</tr>
+				#end
+				
+				#if($logisText)
+				<tr>
+					<input type="hidden" name="log_text" value="${logisText}">
+					<td>将要添加节点：</td>
+                    <td><span style="color:red;font-size:1.2em;">$logisText</span>
+					<button type="submit" class="btn btn-success">
+							确定
+					</button></td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+    </form>
+	<form action="setupTranspComp.do" method="post">
+    	<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>手动录入物流节点信息，信息将直接呈现给商城用户</th>
+					<th>谨慎操作</th>
+				</tr>
+			</thead>
+			<tbody>
+        		<tr >
+        			<td style="width:50%;">
+        				<div class="col-md-12">
+        					<input name="rel_id" id="rel_id" type="hidden" value="${orderId}">
+        					<label class="block clearfix"> 
+        						<span class="block input-icon input-icon-right"> 
+        							<input type="text" class="form-control" placeholder="请输入所要添加的节点信息" name="log_text" />
+        						</span>
+        					</label>
+        				</div>
+        			</td>		
+                    <td>
+    					<button type="submit" class="btn btn-success">
+    						确定
+    					</button>
+    				</td>	
+                </tr>
+			</tbody>
+        </table>
+    </form>
+</div>
+	
+<div class="table-responsive">
+	<hr>
+	<h1>转运公司完整物流信息：</h1>
+	#foreach($logist in $express)
+        <h3>海外包裹号：$logist.orderId</h3>
+		#foreach($sal in $logist.infoBeans)
+			<span class="icon-bookmark" style="margin-left:30px;">货品名称：$sal.title</span><br>
+			<span class="icon-heart" style="margin-left:50px;">规格：$sal.sku_properties_name</span><br>
+			<span class="icon-heart" style="margin-left:50px;">数量：$sal.num</span><br>
+			<span class="icon-heart" style="margin-left:50px;">价格：$sal.price</span><br>
+		#end
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>时间</th>
+					<th>物流信息</th>
+					<th>详细说明</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				#foreach($sal in $logist.logBeans)
+				<tr>
+					<td>$sal.created</td>
+					<td>$sal.content</td>
+					<td>$sal.details</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+	#end
+</div>
+<!-- /.table-responsive -->

@@ -1,0 +1,41 @@
+#set($page_title="采购货品备注信息录入") 
+#set($layout="layout.vm")
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	<div class="widget-body">
+		<div class="widget-main">
+			<form action="updateOrderInfoRemark.do" method="post">
+				#if($bean)
+				<p>客户名称：$bean.name</p>
+				<p>手机号码：$bean.mobile</p>
+				<p>收货地址：$bean.province $bean.city $bean.district $bean.address</p>
+				<p>货品信息：$bean.fileName</p>
+				#end
+				<hr>
+				<div>
+					#if(${remark})
+						${remark}
+					#end
+				</div>
+				<fieldset>
+					<input name="id" id="id" type="hidden" value="${id}">
+					<div>
+						<label for="form-field-8">请输入备注信息：</label>
+						<input class="form-control" id="remark" name="remark" placeholder="请输入备注信息："/>
+					</div>
+					<br>
+					<div class="clearfix" style="text-align:center;">
+						<button type="submit" class="btn btn-lg btn-success">
+							<i class="icon-ok"></i>
+							提交
+						</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	<!-- /widget-body -->
+</div>
+<!-- /signup-box -->
+</div>
+<!-- /position-relative -->

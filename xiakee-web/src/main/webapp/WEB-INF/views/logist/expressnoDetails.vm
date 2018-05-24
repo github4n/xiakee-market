@@ -1,0 +1,83 @@
+#set($page_title="海外包裹详情") 
+#set($layout="layout.vm")
+<div style="margin-top:5px;margin-left:15px">
+	<form action="searchLogistDetails.do">
+		<label> 海外包裹号：
+			<input id="expressno" type="text" name="expressno" style="width:300px;"/>
+		</label>
+		<button type="submit" class="btn btn-sm btn-success nav-search-input">
+			物流查询
+		</button>
+    </form>
+</div>
+<div class="table-responsive">
+	#if($msg)
+    	<div class="alert alert-block alert-success">
+    			<button type="button" class="close" data-dismiss="alert">
+    				<i class="icon-remove"></i>
+    			</button>
+    			<i class="icon-ok green"></i>$msg
+    	</div>
+	#end
+	<h1>海外包裹号：$bean.orderId</h1>
+		#foreach($sal in $bean.infoBeans)
+			<span class="icon-bookmark" style="margin-left:30px;">货品名称：$sal.title</span><br>
+			<span class="icon-heart" style="margin-left:50px;">规格：$sal.sku_properties_name</span><br>
+			<span class="icon-heart" style="margin-left:50px;">数量：$sal.num</span><br>
+			<span class="icon-heart" style="margin-left:50px;">价格：$sal.price</span><br>
+			<span class="icon-heart" style="margin-left:50px;">收货人：$sal.name</span><br>
+			<span class="icon-heart" style="margin-left:50px;">联系方式：$sal.mobile</span><br>
+			<span class="icon-heart" style="margin-left:50px;">收货地址：$sal.address</span><br>
+			<div style="padding-left:50px;width:80%;">
+    			<form action="addOrderPrintTask.do" method="post">
+    				<input name="id" id="id" type="hidden" value="$sal.id">
+    				<input name="expressno" id="expressno" type="hidden" value="$bean.orderId">
+    					<table style="width:100%;">
+    						<tr>
+    							<td style="width:180px;">
+                    				<select class="form-control" name="title">
+                    					<option value="国家人才、优先派送">国家人才、优先派送</option>
+                    					<option value="跑马精英、装备先行">跑马精英、装备先行</option>
+                    					<option value="户外达人、千里挑一">户外达人、千里挑一</option>
+                    					<option value="装备精良、跑团萌主">装备精良、跑团萌主</option>
+                    					<option value="万事俱备、只欠执行">万事俱备、只欠执行</option>
+                    					<option value="新装备、新常态">新装备、新常态</option>
+                    					<option value="装备送达、拒贴秋膘">装备送达、拒贴秋膘</option>
+                    					<option value="尊贵客户，优先派送">尊贵客户，优先派送</option>
+                    				</select>
+                                </td>
+    							<td >
+                    				<button type="submit" class="icon-print bigger-80">
+                    					打印
+                    				</button>
+                                </td>
+                            </tr>
+                        </table>
+                </form>
+			</div><br>
+			
+			<hr>
+		#end
+	<h3>包裹物流追踪:</h3>
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>时间</th>
+					<th>物流信息</th>
+					<th>详细说明</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				#foreach($sal in $bean.logBeans)
+				<tr>
+					<td>$sal.created</td>
+					<td>$sal.content</td>
+					<td>$sal.details</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+</div>
+<!-- /.table-responsive -->

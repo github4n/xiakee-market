@@ -1,0 +1,8 @@
+<div style="padding-left:10px;">
+    <a href="statisticsSource.do" class="btn btn-sm btn-success nav-search-input">来源占比</a>
+    <a href="statisticsProvince.do" class="btn btn-sm btn-success nav-search-input">省份占比</a>
+    <a href="statisticsTime.do" class="btn btn-sm btn-success nav-search-input">小时趋势</a>
+    <a href="statisticsDate.do" class="btn btn-sm btn-success nav-search-input">日度趋势</a>
+    <a href="statisticsMonth.do" class="btn btn-sm btn-success nav-search-input">月度趋势</a>
+    <a href="statisticsCost.do" class="btn btn-sm btn-success nav-search-input">金额统计</a>
+</div>

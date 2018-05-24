@@ -1,0 +1,33 @@
+#set($page_title="订单打印-遐客行") #set($layout="layout.vm")
+
+<div class="table-responsive">
+	&nbsp;#include("sku/skuChildOper.vm")<br/>
+	<table id="sample-table-1" class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>品牌编号</th>
+				<th>品牌名称</th>
+				<th>品牌简称</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			#foreach($sal in ${beans})
+			<tr>
+				<td>$sal.id</td>
+				<td>$sal.name</td>
+				<td>
+					#if($sal.brandCode) 
+						<input type = "text" alt="$sal.id" t="brand" value="$sal.brandCode"/> 
+					#else
+						<input type = "text" alt="$sal.id" t="brand" value="" /> 
+					#end
+				</td>
+			</tr>
+			#end
+		</tbody>
+	</table>
+</div>
+<script src="assets/js/jquery-2.0.3.min.js"></script>
+<script src="js/sku/skuManager.js"></script>
+<!-- /.table-responsive -->

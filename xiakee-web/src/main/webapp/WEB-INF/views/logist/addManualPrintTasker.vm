@@ -1,0 +1,204 @@
+#set($page_title="手动录入打印任务")
+#set($layout="layout.vm")
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	<div class="widget-body">
+		<div class="widget-main">
+			<form action="addManualPrintTasker.do" method="post">
+			<h4 class="header green lighter bigger">发货方信息：</h4>
+				<fieldset>
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix "> <span
+								class="block input-icon input-icon-right"> 寄件人姓名： <input
+									type="text" class="form-control" name="fromName"
+									value="${print.fromName}" />
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 始发地： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="fromDest" value="${print.fromDest}" />
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix"> <span
+								class="block input-icon input-icon-right"> 单位名称： <input
+									type="text" class="form-control" name="company"
+									value="${print.company}" />
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 省份： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="fromProv" value="${print.fromProv}" />
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix"> <span
+								class="block input-icon input-icon-right"> 市县： <input
+									type="text" class="form-control" name="fromCity"
+									value="${print.fromCity}" />
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 区县： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="fromDist" value="${print.fromDist}" />
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix"> <span
+								class="block input-icon input-icon-right"> 发货地址： <input
+									type="text" class="form-control" name="fromAddr"
+									value="${print.fromAddr}" />
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 联系电话： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="fromMobile" value="${print.fromMobile}" />
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix"> 网址： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="fromUrl"  value="${print.fromUrl}" />
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 公众号： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="fromNum"
+									value="${print.fromNum}" />
+							</span>
+							</label>
+						</div>
+					</div>
+			</fieldset>
+			<h4 class="header green lighter bigger">收货方信息：</h4>
+				<fieldset>
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix "> <span
+								class="block input-icon input-icon-right"> 收件人姓名： <input
+									type="text" class="form-control" name="name"/>
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 目的地： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="destination"/>
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix"> <span
+								class="block input-icon input-icon-right"> 单位名称： 
+							<select class="form-control" name="title">
+								<option value="国家人才、优先派送">国家人才、优先派送</option>
+								<option value="跑马精英、装备先行">跑马精英、装备先行</option>
+								<option value="户外达人、千里挑一">户外达人、千里挑一</option>
+								<option value="装备精良、跑团萌主">装备精良、跑团萌主</option>
+								<option value="万事俱备、只欠执行">万事俱备、只欠执行</option>
+								<option value="新装备、新常态">新装备、新常态</option>
+								<option value="装备送达、拒贴秋膘">装备送达、拒贴秋膘</option>
+								<option value="尊贵客户，优先派送">尊贵客户，优先派送</option>
+							</select>
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 省份： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="province"/>
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix"> <span
+								class="block input-icon input-icon-right"> 市县： <input
+									type="text" class="form-control" name="city"/>
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 区县： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="district"/>
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-7">
+							<label class="block clearfix"> <span
+								class="block input-icon input-icon-right"> 收货地址： <input
+									type="text" class="form-control" name="address"/>
+							</span>
+							</label>
+						</div>
+						<div class="col-md-5">
+							<label class="block clearfix"> 联系电话： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="mobile"/>
+							</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="row show-grid">
+						<div class="col-md-12">
+							<label class="block clearfix"> 内件名称： <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="fileName"/>
+							</span>
+							</label>
+						</div>
+					</div>
+						<div class="space-24"></div>
+
+						<div class="clearfix">
+							<button type="submit"
+								class="width-100 icon-print btn btn-sm btn-success">
+								打印 <i class="icon-arrow-right icon-on-right"></i>
+							</button>
+						</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	<!-- /widget-body -->
+</div>
+<!-- /signup-box -->
+</div>
+<!-- /position-relative -->

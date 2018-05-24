@@ -1,0 +1,6 @@
+#set($page_title="首页")
+#set($layout="layout.vm")
+
+<div class="page-header">
+    <h1>你好。欢迎访问管理后台系统！ </h1>
+</div>

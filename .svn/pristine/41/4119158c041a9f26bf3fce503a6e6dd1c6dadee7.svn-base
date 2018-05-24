@@ -1,0 +1,50 @@
+#set($page_title="同步SKU数据") 
+#set($layout="layout.vm")
+#set($title="SKU信息管理")
+
+
+<div class="table-responsive" id="table-responsive">
+	&nbsp;#include("sku/skuChildOper.vm")
+	<a href="javascript:void(0);" onclick="reCrawler('${skuCode}')" class="btn btn-success">重新抓取</a>
+	<a href="javascript:void(0);" onclick="importShop('${skuCode}')" class="btn btn-success">导入商城</a>
+	<br />
+	<table id="sample-table-1" class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>编号</th>
+				<th>产品名称</th>
+				<th>大小</th>
+				<th>颜色</th>
+				<th>图片</th>
+				<th>货品号</th>
+			</tr>
+		</thead>
+		<tbody>
+			#set($index = 1)
+			#foreach($sal in ${goodsBeanList})
+			<tr>
+				<td>$index</td>
+				<td>$managerBean.zhName</td>
+				<td>$sal.size</td>
+				<td>$sal.color</td>
+				<td><img src="http://img.xiakee.com/i/50-50-1/img.xiakee.com$sal.image" /></td>
+				<td>$sal.goodsNo</td>
+				#set($index = $index + 1)
+			</tr>
+			#end
+		</tbody>
+	</table>
+</div>	
+    
+<!-- /.table-responsive -->
+#define($jsblock)
+<script src="assets/js/jqGrid/jquery.jqGrid.min.js"></script>
+<script src="js/sku/manager.js"></script>
+<script type="text/javascript">
+	function reCrawler(skuCode){
+		if(confirm("确定要重新抓取数据吗？")){
+			window.location.href  = "reCrawler.do?skuCode=" + skuCode;
+		}
+	}
+</script>
+#end

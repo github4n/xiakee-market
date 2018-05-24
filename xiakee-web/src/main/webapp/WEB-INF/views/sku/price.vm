@@ -1,0 +1,104 @@
+#set($page_title="SKU价格修改") 
+#set($layout="layout.vm")
+#set($title="SKU信息管理")
+
+<div class="table-responsive" id="table-responsive">
+	&nbsp;#include("sku/skuChildOper.vm")
+	<a href="javascript:;" class="btn btn-success" onclick="save();">保存到商城</a>
+	<br />
+	<div style="margin:14px 30px;font-size:20px;">
+		产品名称：$managerBean.zhName
+	</div>
+	<div style="float:right;font-size:14px;margin-bottom:10px;margin-right:30px;">
+		请选择商品毛利类型
+		<select id="grossProfitMarginSelect" name="grossId" style="width:100px;height:30px;font-size:14px;">
+			#foreach($item in ${grossProfits})
+				<option value="$item.id" #if($item.id == $managerBean.grossId) selected=selected #end>$item.name</option>
+			#end
+		</select>
+		<input type="hidden" id="skuCode" value="$!{managerBean.skuCode}" />
+		<input type="text" style="width:100px;height:30px;" id="grossProfitMargin" pattern="^[0-9]+(.[0-9]+)?$" name="grossProfitMargin" title="请输入小数，例如：0.030" value="$!{managerBean.grossProfitMargin}" onchange="chengeGross();"/>
+	</div>
+	<table id="sample-table-1" class="table table-bordered">
+		<thead>
+			<tr>
+				<th><input id="checkboxAll" type="checkbox" value="0" onclick="checkClick(this);"/></th>
+				<th>货品号</th>
+				<th>图片</th>
+				<th>规格</th>
+				<th>当前成本价</th>
+				<th>当前销售价</th>
+				<th>当前库存</th>
+				<th>抓取网站</th>
+				<th>抓取价格</th>
+				<th>抓取库存</th>
+				<th>成本涨幅</th>
+				<th>修改价格</th>
+				<th>修改库存</th>
+			</tr>
+		</thead>
+		<tbody>
+			#if($goodsPriceBeanList.size() > 0) 
+				#foreach($sal in ${goodsPriceBeanList})
+				<tr>
+					<th rowspan="$sal.skuPriceBeanList.size()"><input name="checkbox" type="checkbox" value="$sal.goodsno" onclick="checkClick(this);" /></th>
+					<td rowspan="$sal.skuPriceBeanList.size()">$sal.goodsno</td>
+					<td rowspan="$sal.skuPriceBeanList.size()"><img src="$sal.image" /></td>
+					<td rowspan="$sal.skuPriceBeanList.size()">$sal.specInfo</td>
+					<td rowspan="$sal.skuPriceBeanList.size()">¥$sal.cost</td>
+					<td rowspan="$sal.skuPriceBeanList.size()">¥$sal.price</td>
+					<td rowspan="$sal.skuPriceBeanList.size()">$sal.store</td>
+					<td>$sal.skuPriceBeanList.get(0).mall</td>
+					<td style="#if($sal.skuPriceBeanList.get(0).costRose > 0)background-color:red#elseif($sal.skuPriceBeanList.get(0).costRose < 0)background-color:green#end">¥$sal.skuPriceBeanList.get(0).crawlerPrice</td>
+					<td style="#if($sal.skuPriceBeanList.get(0).crawlerStore <= 0)background-color:yellow#end">${sal.skuPriceBeanList.get(0).crawlerStore}</td>
+					<td>${sal.skuPriceBeanList.get(0).costRose}%</td>
+					<td rowspan = "$sal.skuPriceBeanList.size()" style="vertical-align:middle;">
+						销售价：¥<input id="${sal.goodsno}Price" name="price" type="text" value="$sal.updatePrice" style="width:70px;"><br/>
+						成本价：¥<input alt="${sal.goodsno}" id="${sal.goodsno}Cost" name="cost" type="text" value="$sal.updateCost" style="width:70px;"><br/>
+					</td>
+					<td rowspan="$sal.skuPriceBeanList.size()" style="vertical-align:middle;">
+						<input id="${sal.goodsno}Store" type="text" value="$sal.updateStore" style="width:50px;">
+					</td>
+				</tr>
+				#set($index = 1)
+				#foreach($priceBean in $sal.skuPriceBeanList)
+					#if($index != 1)
+					<tr>
+						<td>$priceBean.mall</td>
+						<td style="#if($priceBean.costRose > 0)background-color:red#elseif($priceBean.costRose < 0)background-color:green#end">¥$priceBean.crawlerPrice</td>
+						<td style="#if($priceBean.crawlerStore <= 0)background-color:yellow#end">$priceBean.crawlerStore</td>
+						<td>${priceBean.costRose}%</td>
+					</tr>
+					#end
+					#set($index = $index + 1)
+				#end
+				#end
+			#else
+				<tr>
+					<td colspan="13" style="text-align:center;"><h2>此商品还未导入商城</h2></td>
+				</tr>
+			#end
+		</tbody>
+	</table>
+	
+</div>	
+    
+<!-- /.table-responsive -->
+#define($jsblock)
+<script src="assets/js/jqGrid/jquery.jqGrid.min.js"></script>
+<script src="js/sku/manager.js"></script>
+<script type="text/javascript">
+	var arr = new Array();
+	#foreach($sal in ${grossProfits})
+	arr[$sal.id] = $sal.value;
+	#end
+</script>
+<script src="js/sku/add-sku.js"></script>
+<script type="text/javascript">
+	function reCrawler(skuCode){
+		if(confirm("确定要重新抓取数据吗？")){
+			window.location.href  = "reCrawler.do?skuCode=" + skuCode;
+		}
+	}
+</script>
+#end

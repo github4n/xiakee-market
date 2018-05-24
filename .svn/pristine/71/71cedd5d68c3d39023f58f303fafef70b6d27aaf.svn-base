@@ -1,0 +1,40 @@
+#set($page_title="二维码生成器") 
+#set($layout="layout.vm")
+
+#include("analy/menu.vm")
+<div style="margin-top:5px;margin-left:15px">
+	<label> 生成链接：
+		<input style="width:500px;" id="url" type="text" name="url" placeholder="请输入所要推广的商城链接"
+			#if($url)
+				value="$url"
+			#end
+		/>
+	</label>
+	<button id="createQrcode" class="btn btn-sm btn-success nav-search-input">
+		确定
+	</button>
+</div>
+<div style="padding-left:20px;" class="table-responsive">
+	<h3>所生成的二维码图片：</h3>
+	#if(${url})
+		<img style="width:500px;height:500px;" id="displayQrcodeImage" src="createQrcodeImage.do?url=${url}">
+	#else
+		<img style="width:500px;height:500px;" id="displayQrcodeImage" src="createQrcodeImage.do">
+	#end
+</div>
+
+#define($jsblock)
+<script type="text/javascript">
+	$(function() {
+		$("#createQrcode").bind("click", function() {
+			displayQrcodeImage($('input[name=url]').val(),'displayQrcodeImage');
+		});
+	});
+	
+	function displayQrcodeImage(url,target) {
+		var newImg = "createQrcodeImage.do?url=" + url;
+		console.log(window.location.pathname);
+		$('#' + target).attr('src',newImg); 
+	}
+</script>
+#end

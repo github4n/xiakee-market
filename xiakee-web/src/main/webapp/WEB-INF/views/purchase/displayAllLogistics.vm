@@ -1,0 +1,66 @@
+#set($page_title="海外订单采购信息录入") 
+#set($layout="layout.vm")
+#set($prev=$page - 1)
+#set($next=$page + 1)
+
+#include("purchase/menu.vm")
+<div class="table-responsive">
+	<form action="beforeAddAbroadInfos.do" method="post">
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th style="width:10%;">订单号码</th>
+					<th>物品名称
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<button type="submit" class="btn-primary">提交海外订单信息</button>
+					</th>
+					<th class="hidden-480" width="70px">客户名称</th>
+					<th>手机号</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				#foreach($sal in ${beans})
+				<tr>
+					<td style="width:10%;">$sal.orderid<br>
+						#if($sal.memo)
+							<p style="color:red;">$sal.memo</p>
+						#end
+					</td>
+					<td>
+						#foreach($info in $sal.beans)
+    						$info.title$info.sku_properties_name【数量:
+    							#if($info.num == '1')
+    								$info.num
+    							#else
+    								<span style="color:red;font-weight:bold;font-size:1.3em;">$info.num</span>
+    							#end
+    						】<input type="checkbox"
+    						name="infos" id="infos" value="$info.id"> 
+    						&nbsp;<a href="$info.prodUrl" target="_blank">查看</a>
+    						&nbsp;<a href="beforeUpdateRemark.do?id=$info.id">备注</a>
+							<br>
+							#if($info.remark)
+								<div style="color:red;display:block;">$info.remark</div>
+							#end
+						#end
+					</td>
+					<td>$sal.name</td>
+					<td>$sal.mobile</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+	</form>
+</div>
+<!-- /.table-responsive -->
+<div style="padding-right:50px;text-align:right;">
+	<a href="displayAllLogistics.do?page=$prev" class="btn btn-sm btn-success nav-search-input">
+		<i class="icon-double-angle-left"></i>上一页
+	</a>
+	<a href="displayAllLogistics.do?page=$next" class="btn btn-sm btn-success nav-search-input">下一页
+	<i class="icon-double-angle-right"></i>
+	</a>
+</div>

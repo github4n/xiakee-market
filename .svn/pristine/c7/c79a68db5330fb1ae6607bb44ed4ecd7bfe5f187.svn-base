@@ -1,0 +1,52 @@
+#set($page_title="首页") 
+#set($layout="layout.vm") 
+#define($jshead)
+#end
+#define($csshead)
+	<link rel="stylesheet" href="assets/css/datepicker.css" />
+	<link rel="stylesheet" href="assets/css/bootstrap-timepicker.css" />
+	<link rel="stylesheet" href="assets/css/daterangepicker.css" />
+#end
+<!-- SKU录入统计 -->
+<div class="col-sm-12">
+	<div class="widget-box">
+		<div class="widget-header widget-header-flat widget-header-small">
+			<h5>
+    			<i class="icon-signal"></i> SKU录入统计
+    		</h5>
+			<div class="input-group">    
+				<input class="form-control" type="text" name="skuSumDatas" id="id-date-range-picker-1">
+				<span class="input-group-addon" id="skuSumDatasBtn">
+					<i class="icon-search nav-search-icon">查询</i>
+				</span>
+			</div>
+    	</div>
+    
+		<div class="widget-body">
+			<div class="widget-main">
+				<div id="piechart-placeholder">
+					<div id="skuSumPie" style="min-width:100%;height:550px"></div>
+				</div>
+			</div>
+			<!-- /widget-main -->
+		</div>
+		<!-- /widget-body -->
+	</div>
+	<!-- /widget-box -->
+</div>
+<!-- end SKU录入统计 -->
+
+#define($jsblock)
+<script src="js/highcharts/highcharts.js"></script> 
+<script src="js/highcharts/themes/gray.js"></script>
+<script src="js/sys/index.js"></script>
+
+<script src="assets/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="assets/js/jquery.ui.touch-punch.min.js"></script>
+<script src="assets/js/chosen.jquery.min.js"></script>
+<script src="assets/js/fuelux/fuelux.spinner.min.js"></script>
+<script src="assets/js/date-time/bootstrap-datepicker.min.js"></script>
+<script src="assets/js/date-time/bootstrap-timepicker.min.js"></script>
+<script src="assets/js/date-time/moment.min.js"></script>
+<script src="assets/js/date-time/daterangepicker.min.js"></script>
+#end

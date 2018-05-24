@@ -1,0 +1,51 @@
+#set($page_title="海外物流录入") 
+#set($layout="layout.vm")
+#include("purchase/menu.vm")
+<div class="table-responsive">
+	<form action="updateExpressno.do" method="post">
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>海外订单号</th>
+					<th>采购网站</th>
+					<th>
+						转运公司：<input type="radio" checked="checked" value="3" name="transfer_id">递优日本&nbsp;
+						 <input type="radio" checked="checked" value="2" name="transfer_id">递优美国&nbsp;
+						<input type="radio" value="1" name="transfer_id">柏威&nbsp;
+						<input type="radio" value="0" name="transfer_id">其他&nbsp;
+						选择物品： <input type="text"
+						style="width: 300px;"
+						placeholder="请选择货品，然后录入海外包裹号" name="expressno" />
+						<button type="submit" class="btn-primary">提交</button>
+					</th>
+					<th class="hidden-480">姓名</th>
+					<th class="hidden-480">单价</th>
+					<th>数量</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				#foreach($sal in ${beans})
+				<tr>
+					<td>$sal.abroadOrderName</td>
+					<td>$sal.url</td>
+					<td>$sal.title <input type="checkbox" name="infos" id="infos"
+						value="$sal.infoId">
+						<br>
+						#if($sal.remark)
+							<div style="color:red;display:block;">$sal.remark</div>
+						#end
+					</td>
+					<td>$sal.name</td>
+					<td>$sal.price</td>
+					<td>$sal.sum</td>
+					<td><a class="label label-sm label-success" href="updateBoxnoInfo.do?infoId=$sal.infoId&abroadId=$sal.abroadId">修改</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+	</form>
+</div>
+<!-- /.table-responsive -->

@@ -1,0 +1,34 @@
+#set($page_title="推广管理列表") 
+#set($layout="layout.vm")
+
+#include("analy/menu.vm")
+<div class="table-responsive">
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>推广人</th>
+					<th>追踪名称</th>
+					<th>备注</th>
+					<th>设置时间</th>
+					<th>订单数量</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				#foreach($sal in ${beans})
+				<tr>
+					<td>$sal.promotion</td>
+					<td>$sal.title</td>
+					<td>$sal.remark</td>
+					<td>$sal.created</td>
+					<td>$sal.sum
+						#if($sal.sum > 0)
+							<a href="findOrderByReferCode.do?id=$sal.id">查看订单</a>
+						#end
+					</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+</div>

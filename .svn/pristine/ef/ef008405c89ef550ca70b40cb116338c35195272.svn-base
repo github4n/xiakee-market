@@ -1,0 +1,271 @@
+package com.xiakee.service.logistics.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xiakee.dao.logistics.BoxnoDao;
+import com.xiakee.dao.order.ErpOrderDao;
+import com.xiakee.dao.yz.YouzanOrderDao;
+import com.xiakee.domain.ecos.EcIdcardBean;
+import com.xiakee.domain.logistics.BoxnoBean;
+import com.xiakee.domain.logistics.BoxnoJson;
+import com.xiakee.domain.logistics.LogistDetailsBean;
+import com.xiakee.domain.logistics.LogisticsBean;
+import com.xiakee.domain.logistics.UdfexAllLogisticsJson;
+import com.xiakee.domain.logistics.UdfexAllLogisticsJson.MasterDto;
+import com.xiakee.domain.logistics.UdfexDetailBean;
+import com.xiakee.domain.order.EcOrderBean;
+import com.xiakee.domain.order.EcOrderLogistBean;
+import com.xiakee.domain.utils.LogistNodeEnum;
+import com.xiakee.domain.utils.SmscContentTypeEnum;
+import com.xiakee.domain.utils.TransferTypeEnum;
+import com.xiakee.domain.yz.YzorderInfoBean;
+import com.xiakee.domain.yz.YzordersBean;
+import com.xiakee.ecdao.order.EcIdcardDao;
+import com.xiakee.ecdao.order.EcOrderDao;
+import com.xiakee.service.logistics.EcOrderLogistService;
+import com.xiakee.service.smsc.OrderSmscNoticeService;
+import com.xiakee.service.utils.BaiweiBoxnoUtil;
+import com.xiakee.service.utils.TimeUtils;
+import com.xiakee.service.utils.UdfexApiUtil;
+
+@Service
+public class EcOrderLogistServiceImpl implements EcOrderLogistService {
+	private static Logger log = Logger.getLogger(EcOrderLogistServiceImpl.class);
+	
+	@Autowired
+	private ErpOrderDao erpOrderDao;
+	@Autowired
+	private EcOrderDao ecOrderDao;
+	@Autowired
+	private BoxnoDao boxnoDao;
+	
+	@Autowired
+	private OrderSmscNoticeService smscNoticeService;
+	
+	@Autowired
+	private EcIdcardDao idcardDao;
+	
+	@Autowired
+	private YouzanOrderDao yzOrderDao;
+
+	@Override
+	public List<EcOrderBean> findAllEcstoreSuccOrders() {
+		Long createTime = TimeUtils.getBeforeTwoMonthTime();
+		List<EcOrderBean> beans = erpOrderDao.findAllEcstoreSuccOrders(createTime);
+		if(beans != null){
+			for(EcOrderBean bean:beans){
+//				List<String> names = ecOrderDao.findLoginNameByMemberId(bean.getMember_id());
+//				bean.setLogin_account(names.toString());
+//				if(StringUtils.isBlank(bean.getMemo())){
+//					bean.setMemo("正常");
+//				}
+				List<BoxnoBean> expressBeans = boxnoDao.findExpressnosByOrderId(String.valueOf(bean.getOrder_id()));
+				String expressno = "";
+				if(expressBeans != null && expressBeans.size() > 0){
+					for(BoxnoBean expressBean:expressBeans){
+						if(StringUtils.isNotBlank(expressBean.getExpressno())){
+							expressno += "<a href=\"searchLogistDetails.do?expressno=" + expressBean.getExpressno() + "\">" + expressBean.getExpressno() + "</a><br>";
+						}
+					}
+//					if(StringUtils.endsWith(expressno, ",")){
+//						expressno = expressno.substring(0,expressno.length()-1);
+//					}
+				}
+				if(StringUtils.isBlank(expressno)){
+					expressno = "尚未录入海外物流ID号";
+				}
+				bean.setExpessons(expressno);
+				bean.setTimeStr(TimeUtils.displayLogistTime(bean.getCreatetime()));
+			}
+		}
+		return beans;
+	}
+
+	@Override
+	public List<EcOrderLogistBean> findAllLogistByOrderId(String orderId) {
+		List<EcOrderLogistBean> beans = null;
+		if(StringUtils.isNotBlank(orderId)){
+			beans = ecOrderDao.findAllLogistByOrderId(Long.parseLong(orderId));
+			Iterator<EcOrderLogistBean> iter = beans.iterator();
+			while(iter.hasNext()){
+				EcOrderLogistBean bean = iter.next();
+				if(!bean.getLog_text().startsWith("您的")){
+					iter.remove();//删除系统自动生成的日志信息
+				}else {
+					bean.setAltTimeStr(TimeUtils.displayLogistTime(bean.getAlttime()));
+				}
+			}
+		}
+		return beans;
+	}
+
+	@Override
+	public int addOrderLogist(EcOrderLogistBean bean) {
+		boolean isOK = false;//是否最后一条物流节点信息，如果是可插入结束标识符
+		
+		LogisticsBean logistBean = new LogisticsBean();
+		logistBean.setOrderid(bean.getRel_id());
+		logistBean.setCreated(TimeUtils.displayCurrentTime());//物流节点时间
+		
+		switch (bean.getNode()) {
+		case 5:
+			logistBean.setLogistNode(LogistNodeEnum.STORAGE);
+			logistBean.setSmscType(SmscContentTypeEnum.LOGISTTWO);
+			break;
+			
+		case 6:
+			logistBean.setLogistNode(LogistNodeEnum.TERMINAL);
+			logistBean.setSmscType(null);
+			break;
+
+		case 7:
+			logistBean.setLogistNode(LogistNodeEnum.BOARDING);
+			logistBean.setSmscType(SmscContentTypeEnum.LOGISTTHRESS);
+			break;
+			
+		case 8:
+			logistBean.setLogistNode(LogistNodeEnum.CUSTOMS);
+			logistBean.setSmscType(null);
+			break;
+			
+		case 9:
+			logistBean.setLogistNode(LogistNodeEnum.DOMESTIC);
+			logistBean.setSmscType(SmscContentTypeEnum.LOGISTFOUR);
+			isOK = true;//最后一条物流节点信息
+			break;
+			
+		default:
+			break;
+		}
+		
+		this.smscNoticeService.sendOrderNotice(logistBean);
+		
+		if(isOK){
+			LogisticsBean okBean = new LogisticsBean();
+			okBean.setOrderid(bean.getRel_id());
+			okBean.setLogistNode(LogistNodeEnum.OK);
+			okBean.setSmscType(null);
+			this.smscNoticeService.sendOrderNotice(okBean);
+		}
+		
+		
+		log.info("成功插入一条物流信息：" + bean);
+		bean.setAlttime(TimeUtils.getCurrentTimeForPhp());
+		return ecOrderDao.addOrderLogist(bean);
+	}
+
+
+	@Override
+	public int manualAddEcosLogist(EcOrderLogistBean bean) {
+		bean.setAlttime(TimeUtils.getCurrentTimeForPhp());
+		return ecOrderDao.addOrderLogist(bean);
+	}
+
+	@Override
+	public List<EcIdcardBean> findIdcardBeansByMemberid(Long member_id) {
+		return idcardDao.findIdcardBeansByMemberid(member_id);
+	}
+
+	@Override
+	public List<LogistDetailsBean> findOrderLogistInfo(String orderId) {
+		List<LogistDetailsBean> detailBeans = Collections.EMPTY_LIST;
+		if(StringUtils.isNotBlank(orderId)){
+			List<BoxnoBean> expressBeans = boxnoDao.findExpressnosByOrderId(orderId);
+			if(expressBeans != null && expressBeans.size() > 0){
+				detailBeans = new ArrayList<LogistDetailsBean>();
+				for(BoxnoBean bean:expressBeans){
+					log.info("根据订单号和海外物流号获取货品信息：orderid:" + orderId + "   expressno:" + bean.getExpressno());
+					List<YzorderInfoBean> infos = yzOrderDao.findInfosByExpressnoAndOrderid(bean.getExpressno(), orderId);
+					LogistDetailsBean detailBean = new LogistDetailsBean();
+					detailBean.setOrderId(bean.getExpressno());
+					detailBean.setInfoBeans(infos);
+					if(bean.getTransfer_id() == TransferTypeEnum.UDFEX.toCode()){
+						YzordersBean orderBean = yzOrderDao.findOrderByOrderid(orderId);
+						UdfexAllLogisticsJson.MasterDto masterDto =  UdfexApiUtil.findAllUdfexLogistict(bean.getExpressno(), orderBean.getName(), 1);
+						if(masterDto == null) {
+							return null;
+						}
+						List<UdfexDetailBean> infoDatas = masterDto.getConsignmentDetailHistoryDtoList();
+						if(infoDatas != null){
+							List<LogisticsBean> logBeans = new ArrayList<LogisticsBean>();
+							for(UdfexDetailBean info:infoDatas){
+								LogisticsBean logBean = new LogisticsBean();
+								logBean.setContent(info.getActionDesc());
+								logBean.setCreated(info.getActionDateTime());
+								logBean.setDetails(info.getMemo());
+								logBeans.add(logBean);
+							}
+							detailBean.setLogBeans(logBeans);
+						}
+					}else if(bean.getTransfer_id() == TransferTypeEnum.BAIWEI.toCode()){
+						List<BoxnoJson.Boxno> boxnos = BaiweiBoxnoUtil.getBoxnoLogistNodes(bean.getExpressno());
+						if(boxnos != null){
+							List<LogisticsBean> logBeans = new ArrayList<LogisticsBean>();
+							for(BoxnoJson.Boxno info:boxnos){
+								LogisticsBean logBean = new LogisticsBean();
+								logBean.setContent(info.getMessage());
+								logBean.setCreated(info.getTime());
+								logBean.setDetails(info.getMessage());
+								logBeans.add(logBean);
+							}
+							detailBean.setLogBeans(logBeans);
+						}
+					}
+					detailBeans.add(detailBean);
+				}
+			}
+		}
+		return detailBeans;
+	}
+
+	@Override
+	public LogistDetailsBean findLogistDetailsByExpressno(String expressno) {
+		LogistDetailsBean detailBean = null;
+		if(StringUtils.isNotBlank(expressno)){
+			detailBean = new LogistDetailsBean();
+			detailBean.setOrderId(expressno);//借用字段
+			List<YzorderInfoBean> infos = yzOrderDao.findInfosByExpressNo(expressno);
+			detailBean.setInfoBeans(infos);
+			int transferID = boxnoDao.findTransferIdByExpressno(expressno);
+			if(transferID == TransferTypeEnum.UDFEX.toCode()){
+				MasterDto masterdto = UdfexApiUtil.findAllUdfexLogistict(expressno, null, 1);
+				if(masterdto != null){
+				List<UdfexDetailBean> infoDatas = masterdto.getConsignmentDetailHistoryDtoList();
+				if(infoDatas != null){
+					List<LogisticsBean> logBeans = new ArrayList<LogisticsBean>();
+					for(UdfexDetailBean info:infoDatas){
+						LogisticsBean logBean = new LogisticsBean();
+						logBean.setContent(info.getActionDesc());
+						logBean.setCreated(info.getActionDateTime());
+						logBean.setDetails(info.getMemo());
+						logBeans.add(logBean);
+					}
+					detailBean.setLogBeans(logBeans);
+				}
+			}
+			}else if(transferID == TransferTypeEnum.BAIWEI.toCode()){
+				List<BoxnoJson.Boxno> boxnos = BaiweiBoxnoUtil.getBoxnoLogistNodes(expressno);
+				if(boxnos != null){
+					List<LogisticsBean> logBeans = new ArrayList<LogisticsBean>();
+					for(BoxnoJson.Boxno info:boxnos){
+						LogisticsBean logBean = new LogisticsBean();
+						logBean.setContent(info.getMessage());
+						logBean.setCreated(info.getTime());
+						logBean.setDetails(info.getMessage());
+						logBeans.add(logBean);
+					}
+					detailBean.setLogBeans(logBeans);
+				}
+			}
+		}
+		return detailBean;
+	}
+}

@@ -1,0 +1,54 @@
+#set($page_title="商城订单物流追踪") 
+#set($layout="layout.vm")
+
+<div style="margin-top:5px;margin-left:15px">
+	<form action="searchLogistDetails.do">
+		<label> 商城订单号：
+			<input id="orderId" type="text" name="orderId"/>
+		</label>
+		<label> 海外包裹号：
+			<input id="expressno" type="text" name="expressno"/>
+		</label>
+		<button type="submit" class="btn btn-sm btn-success nav-search-input">
+			物流查询
+		</button>
+    </form>
+</div>
+<div class="table-responsive">
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th width="200px">下单时间</th>
+					<th>商城订单</th>
+					<th>海外物流</th>
+					<th width="150px">收货人</th>
+					<th width="200px">订单来源</th>
+					<th width="150px">身份证</th>
+					<th width="80px">操作</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				#foreach($sal in ${beans})
+				<tr>
+					<td>$sal.timeStr</td>
+					<td>$sal.order_id</td>
+					<td>$sal.expessons</td>
+					<td>$sal.ship_name</td>
+					<td>
+						#if($sal.source == 'pc')
+							标准平台
+						#elseif($sal.source == 'weixin')
+							微信商城
+						#else
+							手机触屏
+						#end
+					</td>
+					<td><a href="displayIdcards.do?memberId=$sal.member_id">查看</a></td>
+                    <td><a href="displayOrderLogist.do?orderId=$sal.order_id">添加</a></td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+</div>

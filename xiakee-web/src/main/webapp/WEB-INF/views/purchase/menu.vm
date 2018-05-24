@@ -1,0 +1,8 @@
+<div style="padding-left:10px;">
+    <a href="displayAllLogistics.do" class="btn btn-sm btn-success nav-search-input">采购录入</a>
+    <a href="displayAllAbroadOrders.do" class="btn btn-sm btn-success nav-search-input">包裹查询</a>
+    <a href="displayAllNoExpressno.do" class="btn btn-sm btn-success nav-search-input">物流录入</a>
+    <a href="displayAllExpressnos.do" class="btn btn-sm btn-success nav-search-input">物流查询</a>
+    <a href="displayAllDeclareBeans.do" class="btn btn-sm btn-success nav-search-input">转运申报</a>
+    <a href="displayDeclaredBeans.do" class="btn btn-sm btn-success nav-search-input">申报查询</a>
+</div>

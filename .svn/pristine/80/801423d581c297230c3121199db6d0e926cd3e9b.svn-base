@@ -1,0 +1,160 @@
+#set($page_title="SKU管理") #set($layout="layout.vm")
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	&nbsp;#include("sku/skuChildOper.vm")<br/>
+	<div class="widget-body">
+		<div class="widget-main">
+			<h4 class="header green lighter bigger">SKU信息管理系统（请首先填写抓取URL，可提升抓取速度）</h4>
+
+			<form action="addSkuInfo.do" onsubmit="return submitCheck();" method="post">
+				<fieldset>
+				     
+					<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix "> 请输入SKU英文名 <span
+								class="block input-icon input-icon-right"><input
+									type="text" class="form-control" name="enName" placeholder="必填项" required/>
+							</span>
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix"> 请输入SKU中文名 <span
+								class="block input-icon input-icon-right"> <input
+									type="text" class="form-control" name="zhName" placeholder="必填项" required/>
+							</span>
+							</label>
+						</div>
+					</div>
+					<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix"> 请选择分类 
+							<span class="block input-icon input-icon-right"> 
+								<select id="firstClassifySelect" name="firstClassify" style="width: 30%;" required>
+								</select>
+								<select id="secondClassifySelect" name="secondClassify" style="width: 30%;">
+								</select>
+								<select id="thirdClassifySelect" name="thirdClassify" style="width: 30%;">
+								</select>
+							</span>
+							<input id="classify" type="hidden" name="classify" value="" />
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix "> 
+								<span class="block input-icon input-icon-right"> 
+								请选择类型  
+								<select id="typeSelect" name="type" style="width: 100%;" required>
+									<option value=""></option>
+									#foreach($item in ${typeBeans})
+										#if($item.type_id != 1 and $item.typeCode and $item.typeCode != "") {
+											<option value="$item.type_id">$item.name</option>
+										}
+										#end
+									#end
+								</select>
+								<input id="typeInput" type="hidden" name="types" value="" required />
+							</span>
+							</label>
+						</div>
+					</div>
+					<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix ">
+								<span class="block input-icon input-icon-right">
+								请选择品牌 
+								<select name="brand" style="width: 100%;" required>
+									<option value=""></option>
+									#foreach($item in ${brandBeans})
+										#if($item.brandCode and $item.brandCode != "") {
+											<option value="$item.id">$item.name</option>
+										#end
+									#end
+								</select>
+							</span>
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix">请选择商品毛利类型
+								<span class="block input-icon input-icon-right">
+									<select id="grossProfitMarginSelect" name="grossId" style="width:100px;">
+										#foreach($item in ${grossProfits})
+											<option value="$item.id">$item.name</option>
+										#end
+									</select>
+									<input type="text" style="width:100px;" pattern="^[0-9]+(.[0-9]+)?$" id="grossProfitMargin" name="grossProfitMargin" title="请输入小数，例如：0.030" value="${defaultgrossProfits}" placeholder="必填项"  required/>
+								</span>
+							</label>
+						</div>
+					</div>
+					
+					<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix "> 请输入商品重量 
+								<span class="block input-icon input-icon-right"> 
+									<input type="text" style="width:90%;" name="weight" pattern="\d+" title="请输入整数，例如：600" placeholder="必填项" required/>&nbsp;克
+								</span>
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix"> 请选择经营类型 
+								<span class="block input-icon input-icon-right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+									<input type="radio" checked="checked" value="1" name="pattern">代购
+									&nbsp;&nbsp;&nbsp;&nbsp;
+									<input type="radio" value="2" name="pattern">自营
+								</span>
+							</label>
+						</div>
+					</div>
+					
+					<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix "> 
+								<span class="block input-icon input-icon-right"> 请输入海外默认地址 
+									<input type="text" pattern="(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?" title="请输入正确的URL地址" class="form-control" name="mainUrl" placeholder="必填项" onBlur="checkUrl();" required/>
+								</span>
+							</label>
+						</div>
+					</div>
+					<input type="hidden" name="springMVC.token" value="${token}" />
+					<br/>
+					<div class="clearfix">
+						<button type="reset" class="width-48 pull-left btn btn-sm">
+							<i class="icon-refresh"></i> 重置
+						</button>
+						<button id="submitButton" type="submit" class="width-48 pull-right btn btn-sm btn-success" >
+							添加 <i class="icon-arrow-right icon-on-right"></i>
+						</button>
+					</div>
+					<br/>
+					<div class="show-grid">
+						<label class="block clearfix">
+							可抓取的网站：
+							<a href="http://www.amazon.com/" target="_blank">amazon</a> | 
+							<a href="http://www.backcountry.com/" target="_blank">backcountry</a> | 
+							<a href="http://www.wiggle.cn/" target="_blank">wiggle</a> | 
+							<a href="http://www.amazon.co.jp/" target="_blank">amazon.co.jp</a> | 
+							<a href="http://www.footlocker.com/" target="_blank">footlocker</a> | 
+							<a href="http://www.6pm.com/" target="_blank">6pm</a> | 
+							<a href="http://www.eastbay.com/" target="_blank">eastbay</a> | 
+							<a href="http://www.champssports.com/" target="_blank">champssports</a> | 
+							<a href="http://www.jimmyjazz.com/" target="_blank">jimmyjazz</a>
+						</label>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	<!-- /widget-body -->
+</div>
+<!-- /signup-box -->
+</div>
+<!-- /position-relative -->
+#define($jsblock)
+<script type="text/javascript">
+	var arr = new Array();
+	#foreach($sal in ${grossProfits})
+	arr[$sal.id] = $sal.value;
+	#end
+</script>
+<script src="js/sku/add-sku.js"></script>
+#end

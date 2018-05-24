@@ -1,0 +1,50 @@
+#set($page_title="订单来源追踪") 
+#set($layout="layout.vm")
+
+#include("analy/menu.vm")
+<div class="table-responsive">
+		<table id="sample-table-1"
+			class="table table-striped table-bordered table-hover">
+			<thead>
+				<tr>
+					<th width="60px">推广人</th>
+					<th >推广组织</th>
+					<th>电脑端</th>
+					<th>移动端</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				#foreach($sal in ${beans})
+				<tr>
+					<td>$sal.promotion</td>
+					<td>$sal.title</td>
+					<td>
+						<a href="$sal.pcUrl" target="_black" class="btn btn-sm btn-success">转发</a>&nbsp;&nbsp;&nbsp;&nbsp;
+						<span data="$sal.pcUrl" name="copyValue" class="btn btn-sm btn-success">复制</span>&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="getQrcodeImage.do?url=$sal.pcUrl"  target="_black" class="btn btn-sm btn-success">生成二维码</a><br>
+					</td>
+					<td>
+						<a href="$sal.wapUrl" target="_black" class="btn btn-sm btn-success">转发</a>&nbsp;&nbsp;&nbsp;&nbsp;
+						<span data="$sal.wapUrl" name="copyValue" class="btn btn-sm btn-success">复制</span>&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="getQrcodeImage.do?url=$sal.wapUrl"  target="_black" class="btn btn-sm btn-success">生成二维码</a>
+					</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+</div>
+
+#define($jsblock)
+<script src="js/jquery.zclip.min.js"></script>
+<script type="text/javascript">
+$(function() {
+	$('span[name=copyValue]').zclip({
+        path:'images/zeroClipboard.swf',
+        copy:function(){
+            return $(this).attr('data');
+        }
+    });
+});
+</script>
+#end

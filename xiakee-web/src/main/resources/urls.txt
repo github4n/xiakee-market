@@ -1,0 +1,7 @@
+##AnalyticalController
+statisticsSource,ROLE_ONE
+statisticsProvince,ROLE_ONE
+statisticsDate,ROLE_ONE
+statisticsTime,ROLE_ONE
+statisticsMonth,ROLE_ONE
+statisticsCost,ROLE_ONE

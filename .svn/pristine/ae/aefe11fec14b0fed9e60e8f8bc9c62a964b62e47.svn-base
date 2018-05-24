@@ -1,0 +1,75 @@
+#set($page_title="添加联盟素材") #set($layout="layout.vm")
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	<div class="widget-body">
+		<div class="widget-main">
+			<h4 class="header green lighter bigger">添加联盟素材</h4>
+			<form action="addMaterial.do" method="post">
+				<fieldset>
+				<div>
+					<label> 
+						名&nbsp;称：<input type="text" name="materialName" placeholder="必填项" style="width:500px;" required/>
+					</label>
+				</div>
+				<div>
+					<label> 
+						地&nbsp;址：<input id="materialUrl" type="text" name="materialUrl" placeholder="必填项" style="width:500px;" onblur="getPrice();" required/>
+					</label>
+				</div>
+				<div>
+					<label> 
+						销售价：<input id="price" type="text" name="price" pattern="^[0-9]+(.[0-9]+)?$" />元
+					</label>
+				</div>
+				<div>
+					<label> 
+						市场价：<input id="mktprice" type="text" name="mktprice" pattern="^[0-9]+(.[0-9]+)?$" />元
+					</label>
+				</div>
+				<div>
+					<label> 
+						推广语：<textarea rows="3" name="materialDesc" placeholder="必填项" style="width:500px;" ></textarea>
+					</label>
+				</div>
+				<div>
+					<label> 
+						状&nbsp;态：<select id="materialStatus" name="materialStatus" style="width:100px;">
+							<option value="0">无效</option>
+							<option value="1">有效</option>
+						</select>
+					</label>
+				</div>
+				<div style="width:100%;float:left;">
+					<label style="float:left;margin-top:5px;">推广图片： </label>
+					<label style="float:left;">
+						<input id="file_upload" name="file_upload" type="file" />
+					</label>
+					<label style="margin-top:5px;float:left;color:red;">
+						&nbsp;* 尺寸：600*500 px 图片大小：200KB以内
+					</label>
+				</div>
+				<div>
+					<img id="uploadImageId" src="" style="width:300px;height:250px;" />
+					<label id="message" style="color:red;"></label>
+					<input id="materialImage" type="hidden" name="materialImage" value="" />
+				</div>
+				<div>
+					<button type="reset" class="btn btn-sm">
+						<i class="icon-refresh"></i> 重置
+					</button>
+					<button id="submitButton" type="submit" class="btn btn-sm btn-success" >
+						添加 <i class="icon-arrow-right icon-on-right"></i>
+					</button>
+				</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- /position-relative -->
+#define($jsblock)
+<link rel="stylesheet" href="js/uploadify/uploadify.css" />
+<script src="js/uploadify/jquery.uploadify.js"></script>
+<script src="js/material/upload-image.js"></script>
+<script src="js/material/material.js"></script>
+#end

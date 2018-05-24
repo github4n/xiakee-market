@@ -1,0 +1,381 @@
+package com.xiakee.service.sku.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSON;
+import com.xiakee.crawler.bean.CrawlerGoods;
+import com.xiakee.crawler.bean.CrawlerProduct;
+import com.xiakee.dao.sku.SkuBrandDao;
+import com.xiakee.dao.sku.SkuCatalogDao;
+import com.xiakee.dao.sku.SkuGoodsDao;
+import com.xiakee.dao.sku.SkuGoodsNoDao;
+import com.xiakee.dao.sku.SkuManagerDao;
+import com.xiakee.dao.sku.SkuTypeDao;
+import com.xiakee.dao.sku.SkuUrlsDao;
+import com.xiakee.domain.sku.SkuBrandBean;
+import com.xiakee.domain.sku.SkuCatalogBean;
+import com.xiakee.domain.sku.SkuCrawlerBean;
+import com.xiakee.domain.sku.SkuGoodsBean;
+import com.xiakee.domain.sku.SkuGoodsNoBean;
+import com.xiakee.domain.sku.SkuManagerBean;
+import com.xiakee.domain.sku.SkuTypeBean;
+import com.xiakee.domain.sku.SkuUrlsBean;
+import com.xiakee.service.sku.SkuCrawlerService;
+import com.xiakee.service.sku.SkuManagerService;
+import com.xiakee.service.utils.ThirtyTwoNumber;
+
+@Service
+public class SkuManagerServiceImpl implements SkuManagerService {
+
+	@Autowired
+	private SkuManagerDao skuManagerDao;
+	@Autowired
+	private SkuCrawlerService skuCrawlerService;
+	@Autowired
+	private SkuGoodsNoDao skuGoodsNoDao;
+	@Autowired
+	private SkuGoodsDao skuGoodsDao;
+	@Autowired
+	private SkuCatalogDao skuCatalogDao;
+	@Autowired
+	private SkuBrandDao skuBrandDao;
+	@Autowired
+	private SkuTypeDao skuTypeDao;
+	@Autowired
+	private SkuUrlsDao skuUrlsDao;
+
+	@Override
+	@Transactional
+	public Integer addSkuManagerBean(SkuManagerBean bean, String[] urls) {
+		bean.setMainUrl(recombUrl(bean.getMainUrl()));
+		skuManagerDao.addSkuManagerBean(bean);
+		SkuCatalogBean catalogBean = skuCatalogDao.findSkuCatalogById(bean.getClassify());
+		SkuTypeBean typeBean = skuTypeDao.findSkuTypeById(bean.getTypes());
+		SkuBrandBean brandBean = skuBrandDao.findSkuBrandById(bean.getBrand());
+		bean.setSkuCode(catalogBean.getCatCode() + typeBean.getTypeCode() + brandBean.getBrandCode() + ThirtyTwoNumber.convertTenToThirtyTwo(bean.getId(), 8));
+		this.updateSkuCode(bean);
+		SkuUrlsBean urlsBean = new SkuUrlsBean();
+		urlsBean.setSkuCode(bean.getSkuCode());
+		urlsBean.setUrl(bean.getMainUrl());
+		urlsBean.setDefUrl(1);
+		skuUrlsDao.addSkuUrlsBean(urlsBean);
+		String rawlerUrls = bean.getMainUrl();
+		if (urls != null && urls.length > 0) {
+			for (String url : urls) {
+				url = recombUrl(url);
+				if (StringUtils.isNotBlank(url)) {
+					urlsBean = new SkuUrlsBean();
+					urlsBean.setSkuCode(bean.getSkuCode());
+					urlsBean.setUrl(url);
+					urlsBean.setDefUrl(0);
+					skuUrlsDao.addSkuUrlsBean(urlsBean);
+					rawlerUrls += ";" + url;
+				}
+			}
+		}
+		skuCrawlerService.crawlerSku(bean.getSkuCode(), rawlerUrls, bean.getTypes() + "", bean.getClassify() + "", 0);
+		comb(bean.getSkuCode());
+		return 1;
+	}
+
+	@Override
+	public Integer delSkuManagerBeanById(Long id) {
+		return skuManagerDao.delSkuManagerBeanById(id);
+	}
+
+	@Override
+	public List<SkuManagerBean> selectByBrandAndClassify_page(Map<String, Object> param) {
+		return skuManagerDao.selectByBrandAndClassify_page(param);
+	}
+
+	@Override
+	public Integer updateSkuCode(SkuManagerBean bean) {
+		return skuManagerDao.updateSkuCode(bean);
+	}
+
+	@Override
+	public SkuManagerBean findSkuManagerBeanById(Long id) {
+		return skuManagerDao.findSkuManagerBeanById(id);
+	}
+
+	@Override
+	public SkuManagerBean findSkuManagerBeanBySkuCode(String skuCode) {
+		return skuManagerDao.findSkuManagerBeanBySkuCode(skuCode);
+	}
+
+	@Override
+	public List<SkuManagerBean> getSkuManagerByBrand(Long brandId) {
+		if (brandId == null) {
+			return skuManagerDao.getSkuManagerNotBrand();
+		}
+		return skuManagerDao.getSkuManagerByBrand(brandId);
+	}
+
+	public void comb(String skuCode) {
+		try{
+		SkuCrawlerBean bean = JSON.parseObject(skuCrawlerService.getSkuInfo(skuCode), SkuCrawlerBean.class);
+		if(bean != null){
+			List<CrawlerProduct> crawlerProductList = bean.getCrawlerProductList();
+			Map<Long, List<CrawlerGoods>> crawlerGoodListMap = bean.getCrawlerGoodListMap();
+			int index = 1;
+			if (crawlerProductList != null && crawlerProductList.size() > 0) {
+				for (CrawlerProduct crawlerProduct : crawlerProductList) {
+					if (crawlerProduct.getIsDefault() == 1) {
+						List<CrawlerGoods> crawlerGoodList = crawlerGoodListMap.get(crawlerProduct.getProductId());
+						if (crawlerGoodList != null && crawlerGoodList.size() > 0) {
+							for (CrawlerGoods crawlerGoods : crawlerGoodList) {
+								SkuGoodsBean record = analysisSpecification(crawlerGoods.getSpecification());
+								record.setSkuCode(skuCode);
+								List<SkuGoodsBean> goodsBeanList = skuGoodsDao.selectBySkuCodeAndSpec(record);
+								List<SkuGoodsNoBean> goodsNoBeansList = skuGoodsNoDao.selectByCrawlerGoodsId(crawlerGoods.getGoodsId());
+								String goodsNo = null;
+								if (goodsBeanList != null && goodsBeanList.size() > 0) {
+									// 已存在
+									goodsNo = goodsBeanList.get(0).getGoodsNo();
+									if (goodsNoBeansList == null || goodsNoBeansList.size() <= 0) {
+										SkuGoodsNoBean goodsNoBean = new SkuGoodsNoBean();
+										goodsNoBean.setGoodsno(goodsNo);
+										goodsNoBean.setCrawler_goods_id(crawlerGoods.getGoodsId());
+										goodsNoBean.setMall_id(crawlerProduct.getCrawlerMall());
+										skuGoodsNoDao.insert(goodsNoBean);
+									}
+								} else {
+									// 不存在
+									SkuGoodsBean goodsBean = new SkuGoodsBean();
+									if (goodsNoBeansList != null && goodsNoBeansList.size() > 0) {
+										goodsNo = goodsNoBeansList.get(0).getGoodsno();
+									} else {
+										goodsNo = skuCode + "-" + ThirtyTwoNumber.convertTenToThirtyTwo(index, 2);
+										SkuGoodsNoBean goodsNoBean = new SkuGoodsNoBean();
+										goodsNoBean.setGoodsno(goodsNo);
+										goodsNoBean.setCrawler_goods_id(crawlerGoods.getGoodsId());
+										goodsNoBean.setMall_id(crawlerProduct.getCrawlerMall());
+										skuGoodsNoDao.insert(goodsNoBean);
+									}
+									goodsBean.setGoodsNo(goodsNo);
+									goodsBean.setSkuCode(skuCode);
+									goodsBean.setColor(record.getColor());
+									goodsBean.setSize(record.getSize());
+									goodsBean.setImage(crawlerGoods.getImageUrl());
+									skuGoodsDao.insert(goodsBean);
+								}
+								index++;
+							}
+						}
+					} else {
+						List<CrawlerGoods> crawlerGoodList = crawlerGoodListMap.get(crawlerProduct.getProductId());
+						if (crawlerGoodList != null && crawlerGoodList.size() > 0) {
+							for (CrawlerGoods crawlerGoods : crawlerGoodList) {
+								SkuGoodsBean record = analysisSpecification(crawlerGoods.getSpecification());
+								record.setSkuCode(skuCode);
+								List<SkuGoodsBean> goodsBeanList = skuGoodsDao.selectBySkuCodeAndSpec(record);
+								if (goodsBeanList != null && goodsBeanList.size() > 0) {
+									String goodsNo = goodsBeanList.get(0).getGoodsNo();
+									SkuGoodsNoBean goodsNoBean = new SkuGoodsNoBean();
+									goodsNoBean.setGoodsno(goodsNo);
+									goodsNoBean.setMall_id(crawlerProduct.getCrawlerMall());
+									List<SkuGoodsNoBean> goodsNoBeanList = skuGoodsNoDao.selectByGoodsNoAndMallId(goodsNoBean);
+									if (goodsNoBeanList == null || goodsNoBeanList.size() <= 0) {
+										goodsNoBean.setCrawler_goods_id(crawlerGoods.getGoodsId());
+										skuGoodsNoDao.insert(goodsNoBean);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		/*List<CrawlerProduct> crawlerProductList = bean.getCrawlerProductList();
+		Map<Long, List<CrawlerGoods>> crawlerGoodListMap = bean.getCrawlerGoodListMap();
+		int index = 1;
+		if (crawlerProductList != null && crawlerProductList.size() > 0) {
+			for (CrawlerProduct crawlerProduct : crawlerProductList) {
+				if (crawlerProduct.getIsDefault() == 1) {
+					List<CrawlerGoods> crawlerGoodList = crawlerGoodListMap.get(crawlerProduct.getProductId());
+					if (crawlerGoodList != null && crawlerGoodList.size() > 0) {
+						for (CrawlerGoods crawlerGoods : crawlerGoodList) {
+							SkuGoodsBean record = analysisSpecification(crawlerGoods.getSpecification());
+							record.setSkuCode(skuCode);
+							List<SkuGoodsBean> goodsBeanList = skuGoodsDao.selectBySkuCodeAndSpec(record);
+							List<SkuGoodsNoBean> goodsNoBeansList = skuGoodsNoDao.selectByCrawlerGoodsId(crawlerGoods.getGoodsId());
+							String goodsNo = null;
+							if (goodsBeanList != null && goodsBeanList.size() > 0) {
+								// 已存在
+								goodsNo = goodsBeanList.get(0).getGoodsNo();
+								if (goodsNoBeansList == null || goodsNoBeansList.size() <= 0) {
+									SkuGoodsNoBean goodsNoBean = new SkuGoodsNoBean();
+									goodsNoBean.setGoodsno(goodsNo);
+									goodsNoBean.setCrawler_goods_id(crawlerGoods.getGoodsId());
+									goodsNoBean.setMall_id(crawlerProduct.getCrawlerMall());
+									skuGoodsNoDao.insert(goodsNoBean);
+								}
+							} else {
+								// 不存在
+								SkuGoodsBean goodsBean = new SkuGoodsBean();
+								if (goodsNoBeansList != null && goodsNoBeansList.size() > 0) {
+									goodsNo = goodsNoBeansList.get(0).getGoodsno();
+								} else {
+									goodsNo = skuCode + "-" + ThirtyTwoNumber.convertTenToThirtyTwo(index, 2);
+									SkuGoodsNoBean goodsNoBean = new SkuGoodsNoBean();
+									goodsNoBean.setGoodsno(goodsNo);
+									goodsNoBean.setCrawler_goods_id(crawlerGoods.getGoodsId());
+									goodsNoBean.setMall_id(crawlerProduct.getCrawlerMall());
+									skuGoodsNoDao.insert(goodsNoBean);
+								}
+								goodsBean.setGoodsNo(goodsNo);
+								goodsBean.setSkuCode(skuCode);
+								goodsBean.setColor(record.getColor());
+								goodsBean.setSize(record.getSize());
+								goodsBean.setImage(crawlerGoods.getImageUrl());
+								skuGoodsDao.insert(goodsBean);
+							}
+							index++;
+						}
+					}
+				} else {
+					List<CrawlerGoods> crawlerGoodList = crawlerGoodListMap.get(crawlerProduct.getProductId());
+					if (crawlerGoodList != null && crawlerGoodList.size() > 0) {
+						for (CrawlerGoods crawlerGoods : crawlerGoodList) {
+							SkuGoodsBean record = analysisSpecification(crawlerGoods.getSpecification());
+							record.setSkuCode(skuCode);
+							List<SkuGoodsBean> goodsBeanList = skuGoodsDao.selectBySkuCodeAndSpec(record);
+							if (goodsBeanList != null && goodsBeanList.size() > 0) {
+								String goodsNo = goodsBeanList.get(0).getGoodsNo();
+								SkuGoodsNoBean goodsNoBean = new SkuGoodsNoBean();
+								goodsNoBean.setGoodsno(goodsNo);
+								goodsNoBean.setMall_id(crawlerProduct.getCrawlerMall());
+								List<SkuGoodsNoBean> goodsNoBeanList = skuGoodsNoDao.selectByGoodsNoAndMallId(goodsNoBean);
+								if (goodsNoBeanList == null || goodsNoBeanList.size() <= 0) {
+									goodsNoBean.setCrawler_goods_id(crawlerGoods.getGoodsId());
+									skuGoodsNoDao.insert(goodsNoBean);
+								}
+							}
+						}
+					}
+				}
+			}
+		}*/
+	}
+
+	private SkuGoodsBean analysisSpecification(String specification) {
+		SkuGoodsBean record = new SkuGoodsBean();
+		if (StringUtils.isNotEmpty(specification)) {
+			if (specification.contains(",")) {
+				for (String str : specification.split(",")) {
+					if (str.contains("size")) {
+						record.setSize(str.split("=")[1].trim());
+					} else if (str.contains("color")) {
+						record.setColor(str.split("=")[1].trim());
+					}
+				}
+			} else {
+				if (specification.contains("size")) {
+					record.setSize(specification.split("=")[1].trim());
+				} else if (specification.contains("color")) {
+					record.setColor(specification.split("=")[1].trim());
+				}
+			}
+		}
+		return record;
+	}
+
+	@Override
+	public Integer updatePriceLockTime(SkuManagerBean bean) {
+		return skuManagerDao.updatePriceLockTime(bean);
+	}
+
+	@Override
+	public String getSkuCodeByUrls(String urls) {
+		Map<String, String> urlMap = new HashMap<String, String>();
+		String[] urlStrs = urls.split(";");
+		for (String url : urlStrs) {
+			String newUrl = recombUrl(url);
+			urls = urls.replace(url, newUrl);
+			urlMap.put(newUrl, url);
+		}
+		String results = skuCrawlerService.getSkuCodeByUrls(urls);
+		@SuppressWarnings("rawtypes")
+		Map skuCodeMap = JSON.parseObject(results, Map.class);
+		StringBuffer urlSb = new StringBuffer();
+		if (skuCodeMap != null) {
+			for (Object key : skuCodeMap.keySet()) {
+				String skuCode = String.valueOf(skuCodeMap.get(key));
+				String url = urlMap.get(String.valueOf(key)) == null ? String.valueOf(key) : urlMap.get(String.valueOf(key));
+				if (StringUtils.isNotBlank(skuCode)) {
+					SkuManagerBean bean = findSkuManagerBeanBySkuCode(skuCode);
+					if (bean != null) {
+						urlSb.append(url).append(" 已经存在，skuCode = ").append(skuCode).append("\r\n");
+					}
+				}
+			}
+		}
+		return urlSb.toString();
+	}
+
+	private String recombUrl(String url) {
+		if (url.contains("sportsauthority.com")) {
+			return "http://www.sportsauthority.com/product/index.jsp?" + getProductId(url);
+		} else if (url.contains("finishline.com")) {
+			return "http://www.finishline.com/store/catalog/product.jsp?" + getProductId(url);
+		}
+		if (url.contains("?")) {
+			url = url.substring(0, url.indexOf("?"));
+		}
+		if (url.contains("amazon")) {
+			String productId = null;
+			Pattern idPattern = Pattern.compile("/B.{9}/");
+			Matcher idMatcher = idPattern.matcher(url);
+			if (idMatcher.find()) {
+				productId = idMatcher.group().replaceAll("/", "");
+			}
+			if (productId == null) {
+				idPattern = Pattern.compile("/B.{9}");
+				idMatcher = idPattern.matcher(url);
+				if (idMatcher.find()) {
+					productId = idMatcher.group().replaceAll("/", "");
+				}
+			}
+			return "http://" + getDomian(url) + "/product/dp/" + productId;
+		} else if (url.contains("footlocker.com") || url.contains("eastbay.com") || url.contains("champssports.com")) {
+			String productId = null;
+			Pattern idPattern = Pattern.compile("model:\\d*");
+			Matcher idMatcher = idPattern.matcher(url);
+			if (idMatcher.find()) {
+				productId = idMatcher.group();
+			}
+			return "http://" + getDomian(url) + "/product/" + productId;
+		}
+		return url;
+	}
+
+	private String getDomian(String url) {
+		Pattern domainPattern = Pattern.compile("(?<=//|)((\\w)+\\.)+\\w+");
+		Matcher domainMatcher = domainPattern.matcher(url);
+		if (domainMatcher.find()) {
+			return domainMatcher.group();
+		}
+		return null;
+	}
+
+	private String getProductId(String url) {
+		Pattern p = Pattern.compile("productId=[0-9a-zA-Z]+");
+		Matcher m = p.matcher(url);
+		if (m.find()) {
+			return m.group();
+		}
+		return null;
+	}
+}

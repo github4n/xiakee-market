@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<http auto-config="true" access-denied-page="/accessDenied.do"><!-- 当访问被拒绝时，会转到403.jsp -->
+		<!-- <intercept-url pattern="/login.html" filters="none" /> <intercept-url 
+			pattern="/followMe.do" access="ROLE_ADMIN" /> <intercept-url pattern="/hello.do" 
+			access="ROLE_ADMIN" /> <intercept-url pattern="/index.do" access="ROLE_ADMIN" 
+			/> <intercept-url pattern="/addOrderTasker.do" access="ROLE_ADMIN" /> <intercept-url 
+			pattern="/displayOrderList.do" access="ROLE_ADMIN" /> <intercept-url pattern="/addLogistics.do" 
+			access="ROLE_ADMIN" /> <intercept-url pattern="/displayAllLogistics.do" access="ROLE_ADMIN" 
+			/> <intercept-url pattern="/validation.do" access="ROLE_ADMIN" /> <intercept-url 
+			pattern="/getData.do" access="ROLE_BIT" /> -->
+		<intercept-url pattern="/allOrderPrintTasker.do"
+			filters="none" />
+		<form-login login-page="/login.html"
+			authentication-failure-url="/login.html?error=true"
+			default-target-url="/index.html" login-processing-url="/login.do" />
+		<logout invalidate-session="true" logout-success-url="/login.html"
+			logout-url="/logout.do" />
+		<http-basic />
+		<!-- 增加一个filter，这点与Acegi是不一样的，不能修改默认的filter了，这个filter位于FILTER_SECURITY_INTERCEPTOR之前 -->
+		<custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="myFilter" />
+	</http>
+
+	<!-- 下面的声明同时启用Spring Security的@Secured和JSR-250注解 -->
+	<global-method-security secured-annotations="enabled"
+		jsr250-annotations="enabled" />
+
+	<!-- 一个自定义的filter，必须包含authenticationManager,accessDecisionManager,securityMetadataSource三个属性， 
+		我们的所有控制将在这三个类中实现，解释详见具体配置 -->
+	<beans:bean id="myFilter"
+		class="com.xiakee.service.urm.MyFilterSecurityInterceptor">
+		<beans:property name="authenticationManager" ref="authenticationManager" />
+		<beans:property name="accessDecisionManager" ref="myAccessDecisionManagerBean" />
+		<beans:property name="securityMetadataSource" ref="securityMetadataSource" />
+	</beans:bean>
+	<!-- 认证管理器，实现用户认证的入口，主要实现UserDetailsService接口即可，使用该别名authenticationManager,则不能使用<authentication-manager>， 
+		否则会引起bean已经注册的错误 如果用户的密码采用加密的话，可以在标签authentication-provider下加点“盐” <password-encoder 
+		hash="md5" -->
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="loginAuthenticationProvider" />
+		<!-- authentication-provider user-service-ref="myUserDetailService"/ -->
+	</authentication-manager>
+
+	<beans:bean id="myUserDetailService" class="com.xiakee.service.urm.MyUserDetailService" />
+
+	<!-- 访问决策器，决定某个用户具有的角色，是否有足够的权限去访问某个资源 -->
+	<beans:bean id="myAccessDecisionManagerBean"
+		class="com.xiakee.service.urm.MyAccessDecisionManager" />
+
+	<!-- 资源源数据定义，即定义某一资源可以被哪些角色访问 -->
+	<beans:bean id="securityMetadataSource"
+		class="com.xiakee.service.urm.MyInvocationSecurityMetadataSource" />
+
+	<beans:bean id="loginAuthenticationProvider"
+		class="com.xiakee.service.urm.LoginAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="myUserDetailService" />
+	</beans:bean>
+</beans:beans>
+
+

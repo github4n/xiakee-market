@@ -1,0 +1,261 @@
+#set($page_title="递优申报物流信息") #set($layout="layout.vm")
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	<div class="widget-body">
+		<div class="widget-main">
+			<h4 class="header green lighter bigger">申报递优物流信息</h4>
+			<form action="udfexDeclareOrderDo.do" method="post">
+				<fieldset>
+					<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix"> 物流号
+								<span class="block input-icon input-icon-right">
+									<input type="hidden" name="size" id="size" value="$!{size}" /> 
+									<input type="text" class="form-control" name="logisticsNo" value="$!{logisticsNo}" required/>
+								</span>
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix"> 物流公司
+								<span class="block input-icon input-icon-right">
+									<input type="text" class="form-control" name="logisticsVendor" value="$!{logisticsVendor}" required/>
+								</span>
+							</label>
+						</div>
+					</div>
+					<!-- 
+					<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix"> 卖家名称
+								<span class="block input-icon input-icon-right"> 
+									<input type="text" class="form-control" name="sellerName" value="!${bean.sellerName}" required/>
+								</span>
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix"> 卖家订单号
+								<span class="block input-icon input-icon-right">
+									<input type="text" class="form-control" name="sellerOrderNo" value="$!{bean.sellerOrderNo}" required/>
+								</span>
+							</label>
+						</div>
+					</div>
+					-->
+					#if($boxnoBeanTransferId==2)
+						<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix"> 预报仓库
+								<span class="block input-icon input-icon-right"> 
+									<input type="text" class="form-control" name="warehouseCode" value="UDF1631" required/>
+								</span>
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix"> 服务产品编码
+								<span class="block input-icon input-icon-right">
+									<input type="text" class="form-control" name="serviceProductCode" value="USE" required/>
+								</span>
+							</label>
+						</div>
+					</div>	 
+					#end
+					
+					#if($boxnoBeanTransferId==3)
+						<div class="row show-grid">
+						<div class="col-md-6">
+							<label class="block clearfix"> 预报仓库
+								<span class="block input-icon input-icon-right"> 
+									<input type="text" class="form-control" name="warehouseCode" value="UDF101" required/>
+								</span>
+							</label>
+						</div>
+						<div class="col-md-6">
+							<label class="block clearfix"> 服务产品编码
+								<span class="block input-icon input-icon-right">
+									<input type="text" class="form-control" name="serviceProductCode" value="JPS" required/>
+								</span>
+							</label>
+						</div>
+					</div>	 
+					#end
+					
+					#set($index = 1)
+					#foreach($bean in ${beanList})
+						<div style="height:2px;background-color:#cce2c1;margin:28px 0;"></div>
+						<div class="row show-grid">
+							<div class="col-md-6">
+								<input name="infoId$index" id="infoId$index" type="hidden" value="$!{bean.infoId}">
+								<label class="block clearfix"> 收货人省州
+									<span class="block input-icon input-icon-right"> 
+										<select id="consigneeStateCode$index" name="consigneeStateCode$index" onchange="consigneeStateCodeChange(this,$index);" style="width:100%;" required>
+											#foreach($item in ${stateList})
+												<option value="$item.stateCode" #if($item.stateCode == ${bean.consigneeInfo.consigneeStateCode}) selected=selected #end>$item.stateName</option>
+											#end
+										</select>
+									</span>
+								</label>
+							</div>
+							<div class="col-md-6">
+								<label class="block clearfix"> 收货人城市
+									<span class="block input-icon input-icon-right"> 
+										<select id="consigneeCityCode$index" name="consigneeCityCode$index" onchange="consigneeCityCodeChange(this,$index);" style="width:100%;" required>
+											<option value=""></option>
+										</select>
+									</span>
+									<input type="hidden" id="consigneeCityCodeHidden$index" value="$!{bean.consigneeInfo.consigneeCityCode}" /> 
+								</label>
+							</div>
+						</div>	
+						
+						<div class="row show-grid">
+							<div class="col-md-6">
+								<label class="block clearfix"> 收货人行政区
+									<span class="block input-icon input-icon-right">
+										<select id="consigneeDistrictCode$index" name="consigneeDistrictCode$index" style="width:100%;" required>
+											<option value=""></option>
+										</select>
+									</span>
+									<input type="hidden" id="consigneeDistrictCodeHidden$index" value="$!{bean.consigneeInfo.consigneeDistrictCode}" /> 
+								</label>
+							</div>
+							<div class="col-md-6">
+								<label class="block clearfix"> 收货人姓名
+									<span class="block input-icon input-icon-right">
+										<input type="text" class="form-control" name="consigneeName$index" value="$!{bean.consigneeInfo.consigneeName}" required/>
+									</span>
+								</label>
+							</div>
+						</div>
+	
+						<div class="row show-grid">
+							<div class="col-md-6">
+								<label class="block clearfix"> 收货人电话 
+									<span class="block input-icon input-icon-right"> 
+										<input type="text" class="form-control" name="consigneePhoneNo$index" value="$!{bean.consigneeInfo.consigneePhoneNo}" required/>
+									</span>
+								</label>
+							</div>
+							<div class="col-md-6">
+								<label class="block clearfix"> 收货人手机 
+									<span class="block input-icon input-icon-right"> 
+										<input type="text" class="form-control" name="consigneeMobileNo$index" value="$!{bean.consigneeInfo.consigneeMobileNo}" required/>
+									</span>
+								</label>
+							</div>
+						</div>
+	
+	
+						<div class="row show-grid">
+							<div class="col-md-6">
+								<label class="block clearfix"> 收货人街道
+									<span class="block input-icon input-icon-right">
+										<input type="text" class="form-control" name="consigneeStreet$index" value="$!{bean.consigneeInfo.consigneeStreet}" required/>
+									</span>
+								</label>
+							</div>
+							<div class="col-md-6">
+								<label class="block clearfix"> 收货人邮编
+									<span class="block input-icon input-icon-right">
+										<input type="text" class="form-control" name="consigneePostCode$index" value="$!{bean.consigneeInfo.consigneePostCode}" required/>
+									</span>
+								</label>
+							</div>
+						</div>
+						#set($iii = 1)
+						#foreach($sal in ${bean.piecesItems})
+							<div class="row show-grid">
+								<div class="col-md-6">
+									<label class="block clearfix"> 商品总价格
+										<span class="block input-icon input-icon-right"> 
+											<input type="text" class="form-control" name="amount$index$iii" value="$!{sal.amount}" required/>
+										</span>
+									</label>
+								</div>
+								<div class="col-md-6">
+									<label class="block clearfix"> 商品品牌
+										<span class="block input-icon input-icon-right">
+											<input type="text" class="form-control" name="brandName$index$iii" value="$!{sal.brandName}" required/>
+										</span>
+									</label>
+								</div>
+							</div>
+							
+							<div class="row show-grid">
+								<div class="col-md-6">
+									<label class="block clearfix"> 币种
+										<span class="block input-icon input-icon-right"> 
+											<input type="text" class="form-control" name="currency$index$iii" value="USD" required/>
+										</span>
+									</label>
+								</div>
+								<div class="col-md-6">
+									<label class="block clearfix"> 商品品名
+										<span class="block input-icon input-icon-right">
+											<input type="text" class="form-control" name="goodsDescription$index$iii" value="$!{sal.goodsDescription}" required/>
+										</span>
+									</label>
+								</div>
+							</div>
+							
+							<div class="row show-grid">
+								<div class="col-md-6">
+									<label class="block clearfix"> 件数
+										<span class="block input-icon input-icon-right"> 
+											<input type="text" class="form-control" name="piecesItemQty$index$iii" value="$!{sal.piecesItemQty}" required/>
+										</span>
+									</label>
+								</div>
+								<div class="col-md-6">
+									<label class="block clearfix"> 规格
+										<span class="block input-icon input-icon-right">
+											<input type="text" class="form-control" name="spec$index$iii" value="$!{sal.spec}" required/>
+										</span>
+									</label>
+								</div>
+							</div>
+							
+							<div class="row show-grid">
+								<div class="col-md-6">
+									<label class="block clearfix"> 一级分类 
+										<span class="block input-icon input-icon-right"> 
+											<select id="classify$index$iii" name="classify$index$iii" onchange="classifyChange(this,$index$iii);" style="width:100%;" required>
+												<option value=""></option>
+												#foreach($item in ${firstCategoryCustomList})
+													<option value="$item.cdCategoryId">$item.categoryName</option>
+												#end
+											</select>
+										</span>
+									</label>
+								</div>
+								<div class="col-md-6">
+									<label class="block clearfix"> 二级分类 
+										<span class="block input-icon input-icon-right">
+											<select id="goodsCode$index$iii" name="goodsCode$index$iii" style="width:100%;" required>
+												<option value=""></option>
+											</select>
+										</span>
+									</label>
+								</div>
+							</div>
+							#set($iii = $iii + 1)
+						#end
+						#set($index = $index + 1)
+					#end
+					<br/>
+					<div class="clearfix">
+						<button id="submitButton" type="submit" class="width-48 btn btn-sm btn-success" >
+							提交 <i class="icon-arrow-right icon-on-right"></i>
+						</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	<!-- /widget-body -->
+</div>
+<!-- /signup-box -->
+</div>
+<!-- /position-relative -->
+#define($jsblock)
+<script src="js/sku/declare.js"></script>
+#end

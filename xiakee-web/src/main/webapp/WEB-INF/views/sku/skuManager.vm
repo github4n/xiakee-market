@@ -1,0 +1,251 @@
+#set($page_title="同步SKU数据") 
+#set($layout="layout.vm")
+#set($title="SKU信息管理")
+#define($csshead)
+	<link rel="stylesheet" href="assets/css/datetimepicker.css" />
+	<link rel="stylesheet" href="assets/css/daterangepicker.css" />
+#end
+<div class="table-responsive" id="table-responsive">
+	&nbsp;#include("sku/skuChildOper.vm")<br />
+	<form action="skuManager.do" method="post">
+	<div style="margin-top:10px;margin-left:15px;">
+		<label>分类 
+			<span> 
+				<select id="firstClassifySelect" name="firstClassify" style="width:80px;">
+				</select>
+				<select id="secondClassifySelect" name="secondClassify" style="width:80px;">
+				</select>
+				<select id="thirdClassifySelect" name="thirdClassify" style="width:80px;">
+				</select>
+			</span>
+			<input id="classify" type="hidden" name="classify" value="${classify}" />
+		</label>
+		<label>
+			<span>
+			品牌 
+			<select name="brand" style="width:120px;">
+				<option value=""></option>
+				#foreach($item in ${brandBeanList})
+					<option value="$item.id" #if($item.id == ${brand}) selected=selected #end>$item.name</option>
+				#end
+			</select>
+		</span>
+		</label>
+		<label>
+			<span>
+				毛利分类
+				<select name="grossId" style="width:60px;">
+					<option value=""></option>
+					#foreach($item in ${grossProfits})
+						<option value="$item.id" #if($item.id == ${grossId}) selected=selected #end>$item.name</option>
+					#end
+				</select>
+			</span>
+		</label>
+		<label>
+			<span>
+				是否导入商城
+				<select name="isImport" style="width:50px;">
+					<option value=""></option>
+					<option value="1" #if(${isImport} == 1) selected=selected #end>是</option>
+					<option value="0" #if(${isImport} == 0) selected=selected #end>否</option>
+				</select>
+			</span>
+		</label>
+		<label style="margin-left:20px;">
+			<span>
+				<button type="submit" class="btn btn-sm btn-success">
+					搜索
+				</button>
+			</span>
+		</label>
+		<br />
+		<label>
+			<span>
+				<select name="type">
+					<option value="0" #if(${type} == 0)selected=selected #end>货号</option>
+					<option value="1" #if(${type} == 1)selected=selected #end>名称</option>
+				</select> 
+				<input type="text" name="skuCode" value="$!{skuCode}" style="width:400px;"/>
+			</span>
+		</label>
+		<label>
+			<span>
+				价格锁定时间 
+				<input type="text" style="width:180px;" name="priceLockDatas" id="id-date-range-picker-1" value="$!{priceLockDatas}">
+			</span>
+		</label>
+		<!--
+		<label>
+			<span>
+				价格状态 
+				<select name="status" onchange="showPriceIncreaseSelect(this)">
+					<option value=""></option>
+					<option value="1" #if(${status} == 1)selected=selected #end>涨价</option>
+					<option value="2" #if(${status} == 2)selected=selected #end>降价</option>
+				</select>
+			</span>
+		</label>
+		<label>
+			<span id="priceIncreaseSelect" style="#if(${status} != '1' && ${status} != '2')display:none#end">
+				价格幅度 
+				<select name="priceIncreaseArithmetic" onchange="priceIncreaseArithmeticSelect(this)">
+					<option value=""></option>
+					<option value="1" #if(${priceIncreaseArithmetic} == 1)selected=selected #end>大于</option>
+					<option value="2" #if(${priceIncreaseArithmetic} == 2)selected=selected #end>小于</option>
+					<option value="3" #if(${priceIncreaseArithmetic} == 3)selected=selected #end>介于</option>
+				</select>
+				<input type="text" name="priceIncrease" value="$!{priceIncrease}" style="width:70px;"/>
+			</span>
+		</label>
+		-->
+	</div>
+	<div id="footPage" style="float:right;margin-right:80px;margin-bottom:10px;margin-top:-32px;">
+		<input id="currPage" name="currPage" type="hidden" value="$!{page.currentPage}"/>
+		<input id="totalPage" name="totalPage" type="hidden" value="$!{page.totalPage}"/>
+		<button type="button" class="btn btn-sm btn-success" onclick="page(0)">上一页</button>
+		<span>
+		<select id="pageId" style="width:60px;" onchange="topage()">
+			#foreach ($foo in [1..${page.totalPage}] ) 
+			    <option value="$foo" #if($foo == $page.currentPage) selected=selected #end>$!{foo}</option>
+			#end
+		</select>
+		/${page.totalPage}</span>
+		<button type="button" class="btn btn-sm btn-success" onclick="page(1)">下一页</button>
+	</div>
+	<table id="sample-table-1" class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>编号</th>
+				<th>英文名称</th>
+				<th>中文名称</th>
+				<th>SKU编码</th>
+				<th style="width:45px;">是否导入</th>
+				<th style="width:65px;">分类</th>
+				<th style="width:65px;">类别</th>
+				<th style="width:95px;">品牌</th>
+				<th style="width:40px;">重量(克)</th>
+				<th style="width:85px;">毛利分类(毛利)</th>
+				<th style="width:65px;">默认URL</th>
+				<!--
+				<th style="width:45px;">运营模式</th>
+				-->
+				<th style="width:85px;">价格锁定时间</th>
+				<th style="width:85px;">创建时间</th>
+				<th style="width:70px;">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			#set($index = ($page.currentPage - 1) * 10 + 1)
+			#foreach($sal in ${beans})
+			<tr>
+				<td>$index</td>
+				<td>$sal.enName</td>
+				<td>$sal.zhName</td>
+				<td>$sal.skuCode</td>
+				<td>
+					#if($sal.isImport == 1) 
+						<span style="color:red">是</span>
+					#else
+						<span style="color:green">否</span>
+					#end
+				</td>
+				<td>$sal.classifyName</td>
+				<td>$sal.typesName</td>
+				<td>$sal.brandName</td>
+				<td>$sal.weight</td>
+				<td>$!{sal.grossName}($!{sal.grossProfitMargin})</td>
+				<td><a href="$sal.mainUrl" target="_blank">默认URL</a></td>
+				<!--
+				<td>
+					#if($sal.pattern == 1) 
+						代购
+					#elseif($sal.pattern == 2)
+						自营
+					#end
+				</td>
+				-->
+				<td>
+					<span id="locktimetd$sal.id">$!dateTool.format('yyyy-MM-dd HH:mm',$!sal.priceLockTime)</span><br/>
+					<a class="btn btn-sm btn-success" style="padding:0px 15px;" data-toggle="modal" data-target="#myModal" alt="$sal.zhName" onclick="setPriceLockTime(this,'$sal.id')">设置</a>
+				</td>
+				<td>$!dateTool.format('yyyy-MM-dd HH:mm:ss',$!sal.created)</td>
+				<td>
+					<a class="btn btn-sm btn-success" style="padding:0px 9px;" href="goodsInfo.do?skuCode=$sal.skuCode" target="_blank">详情</a>
+					<br />
+					<a class="btn btn-sm btn-success" style="padding:0px 9px;margin:1px 0px;" href="price.do?skuCode=$sal.skuCode" target="_blank">价格</a>
+					<br />
+					<a class="btn btn-sm btn-success" style="padding:0px 9px;" href="javascript:;" onclick="delSku('$sal.id');">删除</a>
+				</td>
+				#set($index = $index + 1)
+			</tr>
+			#end
+		</tbody>
+	</table>
+	</form>
+</div>	
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                  &times;
+            </button>
+            <h4 class="modal-title" id="myModalLabel">
+            	价格锁定时间设置
+            </h4>
+         </div>
+         <div class="modal-body" style="font-size:18px;">
+     		<div>商品名：</div>
+     		<div id="title"></div>
+     		<div>锁定时间：</div>
+     		<input id="pid" type="hidden" value="" />
+     		<div class="input-append date form_datetime" data-date="">
+			    <input id="priceLockTimeId" size="16" style="width:150px;" type="text" value="" readonly />
+			    <span class="add-on"><i class="icon-remove"></i></span>
+			    <span class="add-on"><i class="icon-calendar"></i></span>
+			</div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+				关闭
+            </button>
+            <button type="button" class="btn btn-primary" onclick="savePriceLockTime();">
+               	保存
+            </button>
+         </div>
+      </div>
+  </div>
+</div>
+<!-- /.table-responsive -->
+#define($jsblock)
+<script src="assets/js/date-time/bootstrap-datetimepicker.min.js"></script>
+<script src="assets/js/date-time/moment.min.js"></script>
+<script src="assets/js/date-time/daterangepicker.min.js"></script>
+<script type="text/javascript">
+	var firstClassify = "$!{firstClassify}";
+	var secondClassify = "$!{secondClassify}";
+	var thirdClassify = "$!{thirdClassify}";
+	$('#id-date-range-picker-1').daterangepicker({
+		format : 'YYYY/MM/DD'
+	}).prev().on(ace.click_event, function() {
+		$(this).next().focus();
+	});
+	$(".form_datetime").datetimepicker({
+        format: "yyyy-mm-dd hh:ii",
+        autoclose: true,
+        todayHighlight:true,
+        minuteStep: 10
+    });
+    function setPriceLockTime(obj,pid) {
+    	$(".modal-body #title").text($(obj).attr("alt"));
+    	$("#pid").val(pid);
+    	$("#priceLockTimeId").val($("#locktimetd"+pid).text());
+    }
+</script>
+<script src="assets/js/jqGrid/jquery.jqGrid.min.js"></script>
+<script src="js/sku/manager.js"></script>
+<script src="js/sku/add-sku.js"></script>
+<script src="js/sku/footer-page.js"></script>
+#end

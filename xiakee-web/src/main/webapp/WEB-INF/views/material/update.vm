@@ -1,0 +1,94 @@
+#set($page_title="编辑联盟素材") #set($layout="layout.vm")
+
+<div id="signup-box" class="signup-box widget-box no-border">
+	<div class="widget-body">
+		<div class="widget-main">
+			<h4 class="header green lighter bigger">编辑联盟素材</h4>
+			<form action="updateMaterial.do" method="post">
+				<fieldset>
+				<div>
+					<label> 
+						<input id="materialId" type="hidden" name="materialId" value="${material.materialId}" />
+						编&nbsp;号：${material.materialId}
+					</label>
+				</div>
+				<div>
+					<label> 
+						<input id="materialId" type="hidden" name="materialId" value="$!{material.materialId}" />
+						名&nbsp;称：<input type="text" name="materialName" placeholder="必填项" style="width:500px;" value="$!{material.materialName}" required/>
+					</label>
+				</div>
+				<div>
+					<label> 
+						地&nbsp;址：<input type="text" name="materialUrl" placeholder="必填项" style="width:500px;" value="$!{material.materialUrl}" required/>
+					</label>
+				</div>
+				<div>
+					<label> 
+						销售价：<input id="price" type="text" name="price" pattern="^[0-9]+(.[0-9]+)?$" value="$!{material.price}"/>元
+					</label>
+				</div>
+				<div>
+					<label> 
+						市场价：<input id="mktprice" type="text" name="mktprice" pattern="^[0-9]+(.[0-9]+)?$" value="$!{material.mktprice}"/>元
+					</label>
+				</div>
+				<div>
+					<label> 
+						推广语：<textarea rows="3" name="materialDesc" placeholder="必填项" style="width:500px;">$!{material.materialDesc}</textarea>
+					</label>
+				</div>
+				<div>
+					<label> 
+						状&nbsp;态：<select id="materialStatus" name="materialStatus" style="width:100px;">
+							<option value="0" #if($material.materialStatus == 0) selected=selected #end>无效</option>
+							<option value="1" #if($material.materialStatus == 1) selected=selected #end>有效</option>
+						</select>
+					</label>
+				</div>
+				<div style="width:100%;float:left;">
+					<label style="float:left;margin-top:5px;">推广图片： </label>
+					<label style="float:left;">
+						<input id="file_upload" name="file_upload" type="file" />
+					</label>
+					<label style="margin-top:5px;float:left;color:red;">
+						&nbsp;* 尺寸：600*500 px 图片大小：200KB以内
+					</label>
+				</div>
+				<div>
+					<img id="uploadImageId" src="$!{material.materialImage}" style="width:300px;height:250px;" />
+					<label id="message" style="color:red;"></label>
+					<input id="materialImage" type="hidden" name="materialImage" value="$!{material.materialImage}" />
+				</div>
+				<div style="margin-top:10px;">
+					<label> 
+						生成时间：<fmt:formatDate value="${material.createTime}" pattern="yyyy-MM-dd HH:mm:ss"/>
+					</label>
+					&nbsp;&nbsp;
+					<label> 
+						最后修改时间：<fmt:formatDate value="${material.updateTime}" pattern="yyyy-MM-dd HH:mm:ss"/>
+					</label>
+					&nbsp;&nbsp;
+					<label> 
+						最后修改人：${material.lastUpdateUser}
+					</label>
+				</div>
+				<div>
+					<button type="button" class="btn btn-sm" onclick="history.back(-1);">
+						<i class="icon-refresh"></i> 返回
+					</button>
+					<button id="submitButton" type="submit" class="btn btn-sm btn-success" >
+						保存 <i class="icon-arrow-right icon-on-right"></i>
+					</button>
+				</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- /position-relative -->
+#define($jsblock)
+<link rel="stylesheet" href="js/uploadify/uploadify.css" />
+<script src="js/uploadify/jquery.uploadify.js"></script>
+<script src="js/material/upload-image.js"></script>
+#end
